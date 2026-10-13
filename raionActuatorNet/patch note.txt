@@ -1,0 +1,209 @@
+raionActuatorNet PATCH NOTE
+
+[2026-10-03 / 기존 C++ MuJoCo 3.13.1로 기본 실행부 전환]
+- CMakeLists.txt, src/augmented_sim.cpp, src/net.h, src/viewer.h 신규.
+  이전 원본 기반 C++ replay/rollout을 가져와 상태 초기화/관절 매핑/수집/검사/시간측정 추가.
+  ../build-greeny/lib/libmujoco.so.3.13.1 링크 확인. MuJoCo/ONNX/libtorch 추가 설치 없음.
+  기존 greeny_homing 실행파일 및 MuJoCo 엔진 소스는 수정하지 않음.
+  별도 augmented_sim 실행파일이다. 기존 GREENY 제어 루프/shared memory에 합쳐진 것은 아님.
+- 물리/PD/수집 CSV/replay/rollout/GRU inference/GUI는 C++로 실행.
+  Python은 CLI/metadata, 원본 GRU 학습, 평가 지표/그래프 생성에 사용.
+- 네이티브 GRU는 Eigen float 연산으로 PyTorch r,z,n 게이트를 구현.
+  scripts/export_cpp.py가 state_dict/정규화를 actuator_net_cpp.json으로 내보냄.
+  torch/libtorch를 C++ 프로세스에서 로드하지 않는다. parity 실패 시 evaluate가 오류를 낸다.
+- scripts/common.py: 기본 BIN을 build/augmented_sim으로 전환.
+  모델/엔진/관절/게인 계약도 native inspect와 MJB hash로 생성. 기존 3.8.1 계약과 구분.
+- scripts/collect.py: C++ collect 호출 및 메타데이터만 담당하도록 교체.
+  이전 Python 수집기는 collect_python_legacy.py로 보존. Python 엔진 파일도 레거시 비교용 보존.
+- scripts/train.py: 기존 학습 알고리즘 유지, C++ export 및 완료 epoch/window/time 기록 추가.
+- scripts/evaluate.py: C++ replay/rollout 호출, C++-PyTorch parity 검증, 실제 경과시간 출력.
+- scripts/pt_to_jit.py: C++ export도 생성. 기존 export가 다른 내용이면 덮어쓰지 않고 거부.
+- src/viewer.h: GLFW/MuJoCo native renderer와 회전/줌 카메라. 힘/상태 조작 없음.
+  Python passive viewer나 전체 simulate UI/기존 GREENY 제어 패널과 동일한 GUI가 아니다.
+  --viewer 또는 --realtime 사용 시 벽시계 대기, headless는 최대 계산 속도로 실행.
+  창 닫기는 headless로 계속. 완료 시 GUI와 GL 리소스를 같은 C++ 스레드에서 정리.
+- run.py, scripts/robot_profiles.py: test/rough-bipedal/rough-quadrupedal 선택 및 --xml 지원.
+  원본 XML을 수정하지 않고 models/<robot>/stand27_<sourcehash>.xml 생성.
+  root 자유관절 제거, 원래 body pose 유지, 양쪽 gripper를 0위치에서 고정(질량/링크 보존),
+  gripper equality/native actuator/sensor 제거, keyframe base/gripper 좌표 제거.
+  자산 경로만 절대경로화. 원본 관성/armature/damping/frictionloss/limit/balanceinertia 유지.
+  runtime은 접촉 비활성화/Euler/외부 sampled PD. 보행용 원본과 동일한 조건이라고 주장하지 않음.
+  프로필 JSON에 원본/생성 XML SHA256 및 변경 목록 기록. 두 원본 해시 불변 확인.
+- C++ 수집 RNG는 Python RNG와 달라 같은 seed의 위상은 다를 수 있음.
+  keyframe에서 시작하고 목표가 limit 안에 있도록 center/amplitude 제한.
+  실제 사용 center/amplitude/phase, dt/duration, 시간 측정을 meta에 기록.
+  native actuator의 force/ctrl 제한은 qfrc_applied에 적용되지 않으며 토크 포화는 미구현.
+- 사용자 gui_demo 확인: 20초/20001행, stride2 -> 10000 label, hidden64/1layer/30epochs.
+  짧은 실제 소요 시간은 빠른 headless 계산 및 작은 배치 학습 때문. 데이터를 생략한 것이 아님.
+  새 C++ 2관절 수집20초 -> loop wall약0.082초(245배속).
+  rough bipedal/quad 수집3초 -> loop wall약0.154/0.161초. 모델 로딩은 별도.
+  bipedal GUI 수집3초 -> loop wall약9.88초. 메시 렌더링 비용으로 실시간보다 느림.
+  collect wrapper는 모델검사/로딩 포함 total time도 기록하도록 추가.
+- 검증: 기존13+native6=19 tests 통과. native 다층 GRU/3종 feature/매핑/시간/zero-residual 확인.
+  2관절 C++ 전체 학습/평가 FF parity 최대 약1.4e-9 Nm.
+  bipedal27: 3초 합성 수집 -> 3epochs 학습 -> 전체 평가/그림 성공.
+  FF parity 최대 약5.96e-8 Nm, 위치 RMSE 감소76.3%/속도19.0%(동일 합성 로그).
+  bipedal GUI/headless CSV byte 동일, 원본 XML 변경 없음.
+  quadrupedal27은 로딩/3초 수집 검증까지. 독립 학습 성능은 아직 평가하지 않음.
+- 산출물: runs/native_smoke, native_bipedal_smoke, native_quadrupedal_smoke, native_bipedal_gui.
+  이전 사용자 gui_demo 모델/결과는 덮어쓰지 않음. 엔진 변경 후에는 재학습 필요.
+- NATIVE_CPP.md 신규: 빌드/선택/60초 수집/학습/GUI 평가 명령 및 한계.
+  README 최상단에 최신 문서로 안내, 아래 Python 설명은 이전 이력임을 명시.
+  audit_changes.py에 src 및 새 launcher/build/docs 파일 해시를 포함.
+- 남은 한계: 실기 수집/성능 검증, 접촉/보행/연동그리퍼 식별, GREENY shared memory 연동 미구현.
+  이번 27관절 실행은 연결 검증이지 실기 성능 또는 일반화 입증이 아니다.
+
+
+[2026-10-03 / 학습하지 않은 합성 궤적 평가]
+- 구현 위치: scripts/check_generalization.py 신규. 기존 학습/수집/평가 코드 변경 없음.
+- 기능: runs/gui_demo/model의 가중치를 고정하고 미리 정한 네 조건을 각각 20초 수집/평가.
+  train.py 호출 없음. 가중치/모델 config/TorchScript의 실행 전후 SHA256 동일 확인.
+- 조건: 모든 새 데이터 seed=1(학습 seed=0). 진폭/주파수는 (.05,.5), (.05,.8),
+  (.08,.5), (.08,.8) [rad,Hz]. 1kHz 물리, stride2, smooth1, kp10/kd.5 유지.
+  torque_scale=.9, extra_damping=.1 유지. 측정 노이즈0. GUI 없이 실행.
+- 산출물: runs/generalization_gui_demo/{manifest.json,summary.md,각조건/log.csv,각조건/eval/}.
+  조건별 commands.json 및 collect/evaluate.log로 실행 이력 보존. 기존 데이터/결과 덮어쓰기 없음.
+- 위치/속도 자유 롤아웃 RMSE 감소율(각 새 로그 자체 baseline 대비):
+  새 위상만: 82.2% / 76.0%
+  새 위상+주파수 .8Hz: 79.8% / 66.7%
+  새 위상+진폭 .08rad: 75.0% / 65.3%
+  새 위상+진폭/주파수 동시 변경: 62.7% / 50.2%
+- 기존 학습 궤적의 위치95.6%/속도87.9% 개선보다 효과 감소. 네 조건 모두 무보정보다 개선.
+- 제한: 동일한 2관절 합성 plant의 다른 궤적, 조건당 새 seed 하나만 평가.
+  실제 로봇 검증이나 광범위한 일반화 입증 아님. 결과 선택/재학습 없이 네 조건 모두 보고.
+
+
+[2026-10-03 / GUI 연결 추가]
+- scripts/live_viewer.py 신규: MuJoCo launch_passive, 별도 모델/데이터 복사로 물리 상태 격리,
+  약 60Hz 화면 갱신 및 wall-clock pacing, --viewer-speed, 카메라 초기 맞춤.
+- scripts/collect.py, mujoco_sim.py: --viewer 옵션으로 수집 및 rollout GUI 연결.
+- scripts/evaluate.py: 각 rollout에만 뷰어 옵션 전달. label replay/GRU 학습은 headless 유지.
+- 창을 닫으면 headless로 계속 진행. 정상 완료 시 창 자동 종료. Ctrl+C로 실행 중단.
+- 최초 실데스크톱 시험에서 저장 후 프로세스 종료 시 segmentation fault 발생.
+  MuJoCo 3.8 passive render daemon 종료 요청 뒤 해당 스레드를 join하도록 수정.
+  수정 후 실데스크톱 6초 수집 정상 종료(exit 0), GUI/headless CSV 바이트 일치 확인.
+- 테스트 13개 통과: 기존 11개 + GUI 모델/상태 격리·닫기 + 잘못된 재생 속도 검사.
+- Xvfb에서 baseline/augmented/oracle/fixed-dt 전체 GUI 평가 성공.
+- runs/viewer_check/에 검증 산출물 보관. 원본/학습 계산/PD/데이터 출처는 변경하지 않음.
+- README에 GUI 실행 명령과 관찰용 UI의 한계를 기록.
+- 실제 27관절 로봇 모델 연결은 여전히 별도 미완료 작업. 화면 검증은 2관절 시험 모델.
+
+작성일: 2026-10-03 (Asia/Seoul)
+
+기록 원칙
+- 매 작업마다 날짜, 구현 위치, 기능, 원본 대비 변경, 검증 결과, 남은 문제를 추가한다.
+- 원본 보존본(reference/raisim)과 Downloads 원본은 수정하지 않는다.
+- 기능 이식 성공과 실제 로봇 성능 검증을 구분한다.
+- 원본 대비 diff는 scripts/audit_changes.py로 audit/<timestamp>/에 계속 누적한다.
+
+[기준 경로]
+원본 후보: /home/dongju/Downloads/actuator-net-gym-articulated-main
+이전 수정 작업본: /home/dongju/actuator-net-gym-articulated-main
+이번 실행 구현부: /home/dongju/mujoco/raionActuatorNet
+사용자가 언급한 raionactuatornet의 실제 디렉터리 이름은 raionActuatorNet이다.
+이번 시작 시 해당 디렉터리는 비어 있었다. MuJoCo 엔진/greeny 코드는 수정하지 않았다.
+
+[2026-10-03 / 원본 유지형 MuJoCo 이식 1차]
+
+1. reference/raisim/{src,scripts,README.md,CMakeLists.txt}
+   기능: 다운로드 폴더의 RaiSim 원본 코드 보존. 원본 C++/Python을 읽기 비교 기준으로 사용.
+   실행 대상 아님. 원본과의 일치 여부는 audit manifest에서 확인.
+
+2. scripts/mujoco_sim.py (신규)
+   기능: 원본 augmented_sim의 replay/rollout CSV 프로토콜을 MuJoCo Python API로 구현.
+   유지: 구간 시작 실측 q/v 초기화, 시작 질량행렬, M*(v_real_end-v_nom_end)/T 라벨,
+         stride/offset, 구간 내 ff 유지, 기본 로그별 dt 및 목표 갱신,
+         steps 지정 시 등분 dt와 시작 목표 유지, fixed-dt 참조 선형보간/목표 ZOH,
+         전체 관절 TorchScript GRU 추론, recurrent state 유지, 기존 CSV 출력 블록.
+   변경: RaiSim 내장 implicit PD -> 외부 sampled PD torque + mj_step(Euler).
+         엔진 결과가 수치적으로 같다고 주장하지 않음. 라벨 재생성/재학습 필요.
+         replay마다 mj_resetData하여 warmstart/이전 force/time 등 내부 상태도 초기화.
+         접촉/native actuator 비활성화. 관절 limit/passive 특성 유지.
+         free/ball/equality/tendon/mimic 명시 거부. 무단 관절 제거 없음.
+         비정상 dt/상태/엔진 warning 거부. 출력 CSV overwrite 거부.
+         joint-config로 CSV 순서와 qpos/dof 인덱스 매핑 및 관절별 PD 게인 지원.
+
+3. scripts/common.py (원본 복사 후 수정)
+   기능: 기존 전처리와 시뮬레이터 호출 연결.
+   유지: Hann smoothing, 중복 시간 첫 행 유지, feature 순서, block_mask, prediction_rate.
+   변경: C++ 실행파일 대신 현재 Python의 mujoco_sim.py 호출.
+         joint_names를 URDF 문서 순서 추정 대신 컴파일 모델/명시 joint-config에서 읽음.
+         kp=0/kd=0을 False와 혼동해 누락하던 옵션 전달 조건 수정.
+         컴파일 모델 SHA256/엔진/PD/관절 순서를 기록하는 simulator_contract 추가.
+         합성 수집 meta가 있으면 CSV 해시/게인/순서 검증. 실기 meta 없는 로그는 경고 후 허용.
+
+4. scripts/train.py (원본 복사 후 최소 수정)
+   유지: 전체 관절 GRU, feature 선택, 학습 데이터 기준 정규화, BPTT 창과 warmup,
+         매 4번째 시간 블록 validation, 겹치는 창 및 마스크 방식,
+         Adam/cosine/gradient clipping/early stop/최선 가중치/TorchScript 출력.
+   변경: 백엔드 설명, simulator 계약 저장, 입력 meta 확인,
+         빈 검증 구간/짧은 로그/비어 있지 않은 출력 폴더 등 오류 선제 검사.
+   원본 블록 분할의 상관/문맥 공유 한계도 유지했다. 독립 파일 검증으로 몰래 바꾸지 않았다.
+
+5. scripts/evaluate.py (원본 복사 후 최소 수정)
+   유지: baseline/augmented/oracle/fixed-dt 및 one-step 평가, 4종 그림과 metrics.json.
+   변경: 실제 관절 매핑 사용, 학습과 평가의 모델/PD/엔진 계약 검증,
+         출력 덮어쓰기 방지, cpp_vs_python 지표를 backend_vs_python으로 개명.
+         Oracle이 보장된 성능 상한이라는 설명을 수정.
+   원본의 rad/Nm 지표 이름은 호환성을 위해 유지. slide 관절에서는 단위 해석 주의.
+
+6. scripts/pt_to_jit.py
+   원본 그대로 복사. 학습기 Deployed 구조/속성과 호환.
+
+7. scripts/collect.py (신규, 원본 수집기의 포팅이라고 주장하지 않음)
+   원본 저장소에는 실제 로봇 수집 구현이 없다. CSV 소비 코드/수집 요구사항만 있다.
+   기능: 고정 dt, 정현파+smoothstep 램프, seed별 위상, 원본 CSV 필드,
+         true q/v 및 command 추가 로깅, 시뮬레이션 출처/설정/해시 meta 기록.
+         관측 q/v 노이즈와 물리 불일치(torque scale/extra damping)를 분리.
+   PD feedback은 true state이며 sensor noise는 상태를 덮어쓰지 않는다.
+   목표 생성기/노이즈 모델은 새 검증 도구이며 실제 로봇 수집 방법과 동일하지 않다.
+   실제 하드웨어 통신, 외부 목표 CSV, 관절별 궤적/노이즈, saturation/lag는 미구현.
+
+8. tests/test_backend.py, tests/pendulum.xml
+   검증: 테스트 11개 통과.
+   동일 모델 zero residual 및 free rollout 일치, 관측노이즈 truth 보존,
+   물리 불일치 nonzero residual, 불규칙 dt+offset, fixed-dt 보간/ZOH,
+   steps 스케줄, 역순 관절 매핑/zero gain, meta 게인 mismatch,
+   비정상 시간 거부, 내부 상태 reset, free/equality 거부.
+   테스트 모델은 독립 2관절이며 실제 Raion 모델이 아님.
+
+9. runs/smoke, runs/verified (자동 생성 시험 산출물)
+   3초/1 kHz 합성 로그, stride=2, smooth=1, kp=10, kd=.5,
+   torque_scale=.9, extra_damping=.1, GRU hidden16/1layer, 3epochs/batch16.
+   수집 -> replay -> 학습 -> TorchScript -> 전체 평가/그림 성공.
+   verified 위치 RMSE: baseline 약 9.455465e-4 rad, augmented 약 9.355287e-4 rad.
+   위치 약 1.1% 개선, 속도 약 2.4% 악화. 성능 개선 입증 아님.
+   backend vs Python FF 최대 차이 약 9.97e-17 Nm.
+   Oracle 약 7.465430e-6 rad. Oracle 잔차는 미래 로그 기반 근사 라벨.
+   같은 합성 로그로 평가했으므로 미관측 실제 궤적에 대한 일반화 검증이 아님.
+
+10. .venv, requirements.txt, README.md, scripts/audit_changes.py, AGENTS.md
+    기존 mj conda 환경을 공유하는 별도 venv. pandas만 해당 venv에 설치.
+    엔진 라이브러리/원본 conda 패키지는 수정하지 않음.
+    원본 비교 재현용 SHA256/통합 diff 및 이후 작업 시 변경 기록 규칙 추가.
+
+[이전 작업본에서 이미 수정했던 내용 — 이번 이식 전 이력]
+경로: /home/dongju/actuator-net-gym-articulated-main
+- README.md: 한국어 설명 및 MuJoCo 이식 안내로 수정. 기존 RaiSim 보고서와 구분 안내.
+- CMakeLists.txt: RaiSim 대신 MuJoCo SDK 검색/연결 추가. 기존 C++ 전체 빌드 미완료.
+- src/augmented_sim.cpp: Sim의 RaiSim world/articulated system을 mjModel/mjData로 변경,
+  상태 읽기/쓰기, fullM, 외부 PD+FF 및 mj_step으로 교체. 전체 libtorch 링크 성공은 미확인.
+- scripts/train.py: RaiSim -> MuJoCo 문서 문자열 변경. 학습 계산 변경 없음.
+- scripts/common.py: 관절 순서 문서 문자열 변경. 해당 이전 주석의 '문서 순서=컴파일 순서'
+  가정은 일반적으로 보장되지 않으므로 이번 이식에서는 명시 매핑으로 교정.
+- scripts/evaluate.py, scripts/pt_to_jit.py: Downloads 기준 원본과 동일함을 이번에 확인.
+- docs/handover/: 질의응답 HTML/PDF 추가.
+- greeny_actuator_net/: 별도 Python 수집/학습/검증/URDF 변환 프레임워크 추가.
+  원본과 다른 train/val 로그 분리 등 설계가 있어 이번 원본 유지형 이식의 본체로 채택하지 않음.
+- greeny_actuator_net/models/rough_terrain_3/: 큰 STL을 형상 보존 OBJ로 변환한 산출물,
+  29좌표/mimic/arm3 관성 오류 기록. 당시 유효한 최종 robot.xml 생성 미완료.
+- role.txt: 사용자 현재 이해 내용 기록 추가.
+- patch note.txt: 이번 요청에 따라 루트에도 이력 요약/새 구현 위치 안내 추가.
+
+[남은 문제 / 완료로 오인하지 말 것]
+- 27관절 실제 로봇 데이터/모델/CSV 순서/게인 미확정. 실기 성능 검증 없음.
+- 이전 제공 원본 URDF의 그리퍼 연동 및 관성 오류를 임의 수정하지 않음.
+- 다른 작업에서 변경되었을 수 있는 mujoco/model의 현재 로봇 모델은 이번에 적용하지 않음.
+- RaiSim과 MuJoCo 간 PD/적분의 정량적 등가성 검증 없음.
+- Python 백엔드 실시간성/greeny C++ runtime/shared memory 연동 미구현.
+- 실기 수집 원본 프로그램이 제공되면 그것의 명령/타임스탬프/피드백 처리에 맞춰 추가 이식 필요.

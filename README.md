@@ -1,3 +1,58 @@
+# mujoco_sdk — RoughTerrain3 / GREENY
+
+MuJoCo 3.13.1 전체 엔진 소스와 RoughTerrain3/GREENY 시뮬레이션 구현입니다.
+로봇 XML, URDF, 메시, ONNX 정책, 설정 및 RoughTerrain3 계약 테스트를 포함합니다.
+기존 MuJoCo 샘플 모델도 보존합니다. 빌드 결과, 캐시, 개인 설정, 학습 실행 로그는 제외합니다.
+
+## 새 PC에서 빌드 (Ubuntu 22.04/24.04, Linux x86_64)
+
+최초 빌드는 인터넷이 필요합니다. MuJoCo의 고정 버전 소스 의존성은 CMake가,
+ONNX Runtime 1.22.0 공식 SDK는 스크립트가 SHA256 검증 후 내려받습니다.
+기존 `/home/dongju` 경로나 사전 빌드된 MuJoCo 라이브러리는 필요하지 않습니다.
+
+```bash
+sudo apt-get update
+sudo apt-get install -y build-essential cmake git curl ca-certificates \
+  libyaml-cpp-dev nlohmann-json3-dev libglfw3-dev libgl1-mesa-dev \
+  libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev
+
+git clone https://github.com/hisyw123/mujoco_sdk.git
+cd mujoco_sdk
+./scripts/build_sdk.sh
+ctest --test-dir build-sdk --output-on-failure
+```
+
+`BUILD_JOBS=2 ./scripts/build_sdk.sh`로 빌드 병렬도를 낮출 수 있습니다.
+실행 스크립트는 동일한 `build-sdk`를 증분 빌드합니다.
+
+```bash
+# RoughTerrain3: bipedal ONNX 정책
+./RoughTerrain3/run.sh
+# GREENY: 기존 ONNX 정책
+./greeny/run.sh
+# RoughTerrain3 quadrupedal: 고정 베이스 관절 궤적
+./RoughTerrain3/run.sh --robot rough-terrain-3
+
+# 디스플레이 없이 로딩/계약 및 짧은 실행 확인
+./build-sdk/bin/roughterrain3_sim --robot rough-terrain-3-bipedal --validate-contract
+./build-sdk/bin/greeny_homing --robot greeny-12inch --validate-contract
+./build-sdk/bin/roughterrain3_sim --robot rough-terrain-3-bipedal --flat-ground --headless --hold-seconds 2
+./build-sdk/bin/greeny_homing --robot greeny-12inch --headless --hold-seconds 2
+```
+
+GUI 실행에는 OpenGL과 데스크톱 디스플레이가 필요합니다.
+현재 RoughTerrain3 정책은 bipedal 전용이며 depth 이미지는 정책 입력이 아닙니다.
+RobotPC HRI 연결 및 헤더명/`.hpp` 통일은 아직 적용하지 않은 현재 구현입니다.
+설정·메타데이터에 남은 학습 원본 절대 경로는 출처 기록이며 실행 시 읽지 않습니다.
+
+`raionActuatorNet/`의 기존 소스와 모델도 함께 보존합니다. 위 공통 빌드 대상은
+RoughTerrain3와 GREENY이며, raion 별도 빌드는 해당 디렉터리 문서를 따르되
+`-DMUJOCO_LIBRARY="$PWD/build-sdk/lib/libmujoco.so"`를 지정할 수 있습니다.
+
+아래는 upstream MuJoCo 문서입니다. 원본 라이선스와 저작권 고지를 보존합니다.
+
+---
+
 <h1>
   <a href="#"><img alt="MuJoCo" src="banner.png" width="100%"/></a>
 </h1>

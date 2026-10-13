@@ -1,0 +1,15 @@
+{
+  "source": "/home/dongju/mujoco/model/RoughTerrain-3/RoughTerrain-3_quadrupedal.xml",
+  "source_sha256": "88b7af27520571e41338966c327c9a516be8719b75df0b656fdacc82568a7b70",
+  "output_sha256": "a29ac8a5133581bbe2ad29b37805bcb864ebd6ce4964165bf223e7cae32159d7",
+  "changes": [
+    "root freejoint removed: root body world pose retained",
+    "two gripper slide joints fixed at their zero position, bodies/masses retained",
+    "equality removed, grippers are now rigid",
+    "native actuators and sensors removed: external joint torques used",
+    "nominal keyframe reduced to 27 hinge coordinates",
+    "mesh/texture paths resolved, source inertias and balanceinertia retained",
+    "runtime disables contact and uses sampled external PD + Euler"
+  ],
+  "warning": "Stand identification variant, NOT original floating/contact locomotion scene."
+}

@@ -1,0 +1,40 @@
+training_env: /home/dongju/greeny/logs/rsl_rl/RoughTerrain3_cat_ppo/2026-10-06_22-30-56_cat_soft_contacts/params/env.yaml
+policy_dt: 0.02
+base_position:
+- 0.0
+- 0.0
+- 1.2
+base_quaternion:
+- 1.0
+- 0.0
+- 0.0
+- 0.0
+motor_contract: ../motor/config/rough_terrain_28dof.yaml
+action_names:
+- LHP_J
+- LHR_J
+- LHY_J
+- LKP_J
+- LAP_J
+- LAR_J
+- RHP_J
+- RHR_J
+- RHY_J
+- RKP_J
+- RAP_J
+- RAR_J
+action_scales:
+- 0.25
+- 0.25
+- 0.25
+- 0.25
+- 0.25
+- 0.25
+- 0.25
+- 0.25
+- 0.25
+- 0.25
+- 0.25
+- 0.25
+action_clip: 100.0
+checkpoint_sha256: 8f55f588c1582b2cbf70ab51613ee85eb4a6ded9ded37aafcaa6dd07e8dd5f07

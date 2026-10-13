@@ -1,0 +1,179 @@
+{
+  "original": "/home/dongju/Downloads/actuator-net-gym-articulated-main",
+  "source": "/home/dongju/actuator-net-gym-articulated-main",
+  "port": "/home/dongju/mujoco/raionActuatorNet",
+  "files": [
+    {
+      "area": "source",
+      "path": "README.md",
+      "original_sha256": "96a6fb1079650f7f362557c3a0b704db347c32a187ef3f401dadb34ca5e39019",
+      "current_sha256": "387826baa057fa67328f5fd8ba3d40a9050ecc85df1283edf1f3882834c14443",
+      "status": "modified"
+    },
+    {
+      "area": "port",
+      "path": "README.md",
+      "original_sha256": "96a6fb1079650f7f362557c3a0b704db347c32a187ef3f401dadb34ca5e39019",
+      "current_sha256": "6232cb526c34ae3a056a29d30651757ebf554b86d4bf689cfb626a4366ef534d",
+      "status": "modified"
+    },
+    {
+      "area": "reference",
+      "path": "README.md",
+      "original_sha256": "96a6fb1079650f7f362557c3a0b704db347c32a187ef3f401dadb34ca5e39019",
+      "current_sha256": "96a6fb1079650f7f362557c3a0b704db347c32a187ef3f401dadb34ca5e39019",
+      "status": "unchanged"
+    },
+    {
+      "area": "source",
+      "path": "CMakeLists.txt",
+      "original_sha256": "5a62e0280dc9c4d3c4f30c879c915c0291213a4979a4b611b7aa579e72f110eb",
+      "current_sha256": "f95bf6beac6814f87086a3875ff858002ab4b5432793e6cd7cb0ccd7210992e9",
+      "status": "modified"
+    },
+    {
+      "area": "port",
+      "path": "CMakeLists.txt",
+      "original_sha256": "5a62e0280dc9c4d3c4f30c879c915c0291213a4979a4b611b7aa579e72f110eb",
+      "current_sha256": "35657f978d8f4108c452f5de99056a00efaf863f47164b00c4dee2ed2bd062bd",
+      "status": "modified"
+    },
+    {
+      "area": "reference",
+      "path": "CMakeLists.txt",
+      "original_sha256": "5a62e0280dc9c4d3c4f30c879c915c0291213a4979a4b611b7aa579e72f110eb",
+      "current_sha256": "5a62e0280dc9c4d3c4f30c879c915c0291213a4979a4b611b7aa579e72f110eb",
+      "status": "unchanged"
+    },
+    {
+      "area": "source",
+      "path": "src/augmented_sim.cpp",
+      "original_sha256": "cbe750a7c8ac6dc4015501530d18926aada1cd716a62dcda51267ae185cf2ad7",
+      "current_sha256": "a50bd30a8e90df4dcc4fdea9c748a64b2dbffa5dca9ea784391397c639d0925d",
+      "status": "modified"
+    },
+    {
+      "area": "port",
+      "path": "src/augmented_sim.cpp",
+      "original_sha256": "cbe750a7c8ac6dc4015501530d18926aada1cd716a62dcda51267ae185cf2ad7",
+      "current_sha256": "e99c8a8a88550762ab398b4742c29bf60d3a29352db2c30c7ba429c71da8b245",
+      "status": "modified"
+    },
+    {
+      "area": "reference",
+      "path": "src/augmented_sim.cpp",
+      "original_sha256": "cbe750a7c8ac6dc4015501530d18926aada1cd716a62dcda51267ae185cf2ad7",
+      "current_sha256": "cbe750a7c8ac6dc4015501530d18926aada1cd716a62dcda51267ae185cf2ad7",
+      "status": "unchanged"
+    },
+    {
+      "area": "source",
+      "path": "scripts/common.py",
+      "original_sha256": "42df3292529ee56e74855ae7ddb20bbe33ffdb1bb8bc6154ca0a26a9c91f0a7f",
+      "current_sha256": "73ae0896e076b8c6cb0870e0054e7a2cc48eefb3a9a92c5dd89526d371e40966",
+      "status": "modified"
+    },
+    {
+      "area": "port",
+      "path": "scripts/common.py",
+      "original_sha256": "42df3292529ee56e74855ae7ddb20bbe33ffdb1bb8bc6154ca0a26a9c91f0a7f",
+      "current_sha256": "210e6e2635c893f2740f1dd3ba6e771f188b1cbc926b14454e2f6b87a8532ecb",
+      "status": "modified"
+    },
+    {
+      "area": "reference",
+      "path": "scripts/common.py",
+      "original_sha256": "42df3292529ee56e74855ae7ddb20bbe33ffdb1bb8bc6154ca0a26a9c91f0a7f",
+      "current_sha256": "42df3292529ee56e74855ae7ddb20bbe33ffdb1bb8bc6154ca0a26a9c91f0a7f",
+      "status": "unchanged"
+    },
+    {
+      "area": "source",
+      "path": "scripts/train.py",
+      "original_sha256": "191405b0d438e2075143eb31de926f098ed8063b5ffc98465aa419a6ae171b9a",
+      "current_sha256": "61f89b49f0c8c5d82cc20c6ceb360ea28b5e334c736a546da0ef317396c56f62",
+      "status": "modified"
+    },
+    {
+      "area": "port",
+      "path": "scripts/train.py",
+      "original_sha256": "191405b0d438e2075143eb31de926f098ed8063b5ffc98465aa419a6ae171b9a",
+      "current_sha256": "c436b70a635e2bb954cd9d42b753515ddfe841b983dd70f68af73f71b07af9ee",
+      "status": "modified"
+    },
+    {
+      "area": "reference",
+      "path": "scripts/train.py",
+      "original_sha256": "191405b0d438e2075143eb31de926f098ed8063b5ffc98465aa419a6ae171b9a",
+      "current_sha256": "191405b0d438e2075143eb31de926f098ed8063b5ffc98465aa419a6ae171b9a",
+      "status": "unchanged"
+    },
+    {
+      "area": "source",
+      "path": "scripts/evaluate.py",
+      "original_sha256": "6813d5b782936a1f9e217cab81be869050240ad6411d7563060f58ba354d5db7",
+      "current_sha256": "6813d5b782936a1f9e217cab81be869050240ad6411d7563060f58ba354d5db7",
+      "status": "unchanged"
+    },
+    {
+      "area": "port",
+      "path": "scripts/evaluate.py",
+      "original_sha256": "6813d5b782936a1f9e217cab81be869050240ad6411d7563060f58ba354d5db7",
+      "current_sha256": "ed7455fcd3cd718d3a2bd793c5406429fa3809cfd5ba05695f6d6597ef9fd6bb",
+      "status": "modified"
+    },
+    {
+      "area": "reference",
+      "path": "scripts/evaluate.py",
+      "original_sha256": "6813d5b782936a1f9e217cab81be869050240ad6411d7563060f58ba354d5db7",
+      "current_sha256": "6813d5b782936a1f9e217cab81be869050240ad6411d7563060f58ba354d5db7",
+      "status": "unchanged"
+    },
+    {
+      "area": "source",
+      "path": "scripts/pt_to_jit.py",
+      "original_sha256": "b95dfcb3d26ef36dc2be017790026c68fe42d14dc2dfd650062e5939dfb87e84",
+      "current_sha256": "b95dfcb3d26ef36dc2be017790026c68fe42d14dc2dfd650062e5939dfb87e84",
+      "status": "unchanged"
+    },
+    {
+      "area": "port",
+      "path": "scripts/pt_to_jit.py",
+      "original_sha256": "b95dfcb3d26ef36dc2be017790026c68fe42d14dc2dfd650062e5939dfb87e84",
+      "current_sha256": "c128543c42fe3745ba5f02a67d0afa721bacea6760407afd7c155fbfb0842a94",
+      "status": "modified"
+    },
+    {
+      "area": "reference",
+      "path": "scripts/pt_to_jit.py",
+      "original_sha256": "b95dfcb3d26ef36dc2be017790026c68fe42d14dc2dfd650062e5939dfb87e84",
+      "current_sha256": "b95dfcb3d26ef36dc2be017790026c68fe42d14dc2dfd650062e5939dfb87e84",
+      "status": "unchanged"
+    }
+  ],
+  "port_inventory": {
+    "scripts/audit_changes.py": "e268a20ad79adb617bba7111418edd250a78e59147f486173d177a8764dd5259",
+    "scripts/collect_python_legacy.py": "b0532ee44c02420e76a0476ba691f634db5e833c98bfa9d2bdf38f797b4bca1f",
+    "scripts/collect.py": "9ee8ac9ae5434cb6605d7d048bee05afd227001f5f6d3493cbb2eb86fa34accb",
+    "scripts/live_viewer.py": "ffb52b10c2322f292f47e853e6fc85d9a6e2f4d41304741fc670c149e9615291",
+    "scripts/common.py": "210e6e2635c893f2740f1dd3ba6e771f188b1cbc926b14454e2f6b87a8532ecb",
+    "scripts/train.py": "c436b70a635e2bb954cd9d42b753515ddfe841b983dd70f68af73f71b07af9ee",
+    "scripts/mujoco_sim.py": "c94ad12abe94f6efdb34acb207b7f7b412e33e6738a1d222da529ddb8e98691b",
+    "scripts/export_cpp.py": "6a3d9909965732472b38101159e1e35c85b813273de258d7185ead3f293ed104",
+    "scripts/pt_to_jit.py": "c128543c42fe3745ba5f02a67d0afa721bacea6760407afd7c155fbfb0842a94",
+    "scripts/robot_profiles.py": "6b52cf8e0d52a26ee650a131b03786dff8fbd8a8d9a2097a71719c57c628f537",
+    "scripts/evaluate.py": "ed7455fcd3cd718d3a2bd793c5406429fa3809cfd5ba05695f6d6597ef9fd6bb",
+    "scripts/check_generalization.py": "5fab1481d0b36635d1de17fc5cad47fc9cb7f7f4740eaf6f56fb4b16c3c755e6",
+    "tests/pendulum.xml": "0991b5b8b079ab542085f4a6edc5b9c531e3a6fde8793fe9b8fc2f8d3e3c2764",
+    "tests/test_backend.py": "0cca49b76b74d3aa517336d2bb616b9dbc11eefac480952b21fc74206482bb5e",
+    "tests/test_native.py": "c47bbb3cee04afb1d844f2215c55a93333f778b326d28638c4e7c1e6be8e9936",
+    "src/net.h": "c5b0a5015cef84617923b8cdc249099fd351f80ede7fbdeaaaaac43bf7f91526",
+    "src/augmented_sim.cpp": "e99c8a8a88550762ab398b4742c29bf60d3a29352db2c30c7ba429c71da8b245",
+    "src/viewer.h": "65ae3085fedcf911abbd06be383858c2b011f99f0501c38fc5532e77fbc76410",
+    "run.py": "9d038c1bf231b6d345ce5a77f426fd4f672588754c506766570510173b9f55ce",
+    "CMakeLists.txt": "35657f978d8f4108c452f5de99056a00efaf863f47164b00c4dee2ed2bd062bd",
+    "README.md": "6232cb526c34ae3a056a29d30651757ebf554b86d4bf689cfb626a4366ef534d",
+    "NATIVE_CPP.md": "e0cb64750f79a7311f92b79b48806498a49fd4f113955f119fa23377d97ba98e",
+    "patch note.txt": "52d13a7e8d6747dced22045698a837e4bf006a60eb863a8732cc28ee957243b3"
+  }
+}

@@ -1,0 +1,268 @@
+{
+  "format": "baseline_policy_v1",
+  "runner_class": "cat_ppo",
+  "iteration": 10000,
+  "inputs": [
+    {
+      "name": "obs",
+      "dtype": "float32",
+      "shape": [
+        1,
+        45
+      ]
+    }
+  ],
+  "outputs": [
+    {
+      "name": "actions",
+      "dtype": "float32",
+      "shape": [
+        1,
+        12
+      ]
+    }
+  ],
+  "io_spec": {
+    "actor_keys": [
+      "policy"
+    ],
+    "critic_keys": [
+      "critic"
+    ],
+    "group_shapes": {
+      "critic": [
+        45
+      ],
+      "policy": [
+        45
+      ]
+    },
+    "num_actions": 12,
+    "environment": {
+      "action_names": [
+        "LHP_J",
+        "LHR_J",
+        "LHY_J",
+        "LKP_J",
+        "LAP_J",
+        "LAR_J",
+        "RHP_J",
+        "RHR_J",
+        "RHY_J",
+        "RKP_J",
+        "RAP_J",
+        "RAR_J"
+      ],
+      "observation_fields": {
+        "commands": [
+          0,
+          3
+        ],
+        "angular_velocity": [
+          3,
+          6
+        ],
+        "gravity": [
+          6,
+          9
+        ],
+        "joint_position": [
+          9,
+          21
+        ],
+        "joint_velocity": [
+          21,
+          33
+        ],
+        "actions": [
+          33,
+          45
+        ]
+      },
+      "action_scales": [
+        0.25,
+        0.25,
+        0.25,
+        0.25,
+        0.25,
+        0.25,
+        0.25,
+        0.25,
+        0.25,
+        0.25,
+        0.25,
+        0.25
+      ],
+      "action_clip": 100.0,
+      "cat_task": {
+        "version": 1,
+        "constraints": [
+          "contact/base_link",
+          "contact/arm1_link",
+          "contact/arm2_link",
+          "contact/arm3_link",
+          "contact/arm4_link",
+          "contact/arm5_link",
+          "contact/arm6_link",
+          "contact/LSP_link",
+          "contact/RSP_link",
+          "contact/LHR_link",
+          "contact/RHR_link",
+          "contact/LHP_link",
+          "contact/RHP_link",
+          "contact/LHY_link",
+          "contact/LKP_link",
+          "contact/LAP_link",
+          "contact/RHY_link",
+          "contact/RKP_link",
+          "contact/RAP_link",
+          "torque/LHP_J",
+          "torque/LHR_J",
+          "torque/LHY_J",
+          "torque/LKP_J",
+          "torque/LAP_J",
+          "torque/LAR_J",
+          "torque/RHP_J",
+          "torque/RHR_J",
+          "torque/RHY_J",
+          "torque/RKP_J",
+          "torque/RAP_J",
+          "torque/RAR_J",
+          "joint_velocity/LHP_J",
+          "joint_velocity/LHR_J",
+          "joint_velocity/LHY_J",
+          "joint_velocity/LKP_J",
+          "joint_velocity/LAP_J",
+          "joint_velocity/LAR_J",
+          "joint_velocity/RHP_J",
+          "joint_velocity/RHR_J",
+          "joint_velocity/RHY_J",
+          "joint_velocity/RKP_J",
+          "joint_velocity/RAP_J",
+          "joint_velocity/RAR_J",
+          "joint_acceleration/LHP_J",
+          "joint_acceleration/LHR_J",
+          "joint_acceleration/LHY_J",
+          "joint_acceleration/LKP_J",
+          "joint_acceleration/LAP_J",
+          "joint_acceleration/LAR_J",
+          "joint_acceleration/RHP_J",
+          "joint_acceleration/RHR_J",
+          "joint_acceleration/RHY_J",
+          "joint_acceleration/RKP_J",
+          "joint_acceleration/RAP_J",
+          "joint_acceleration/RAR_J",
+          "action_rate/LHP_J",
+          "action_rate/LHR_J",
+          "action_rate/LHY_J",
+          "action_rate/LKP_J",
+          "action_rate/LAP_J",
+          "action_rate/LAR_J",
+          "action_rate/RHP_J",
+          "action_rate/RHR_J",
+          "action_rate/RHY_J",
+          "action_rate/RKP_J",
+          "action_rate/RAP_J",
+          "action_rate/RAR_J",
+          "joint_position/LHP_J",
+          "joint_position/LHR_J",
+          "joint_position/LHY_J",
+          "joint_position/LKP_J",
+          "joint_position/LAP_J",
+          "joint_position/LAR_J",
+          "joint_position/RHP_J",
+          "joint_position/RHR_J",
+          "joint_position/RHY_J",
+          "joint_position/RKP_J",
+          "joint_position/RAP_J",
+          "joint_position/RAR_J",
+          "height",
+          "orientation",
+          "vertical_speed",
+          "roll_pitch_speed",
+          "hip_yaw",
+          "stand_still",
+          "foot_xy",
+          "both_feet_air",
+          "slip/left",
+          "slip/right"
+        ],
+        "thresholds": {
+          "cat_contact_force": 10.0,
+          "cat_torque_fraction": 0.9,
+          "cat_velocity_fraction": 0.9,
+          "cat_acceleration_limit": 400.0,
+          "cat_action_rate_limit": 8.0,
+          "cat_slip_speed": 0.2,
+          "cat_height_tolerance": 0.15,
+          "cat_orientation_limit": 0.35,
+          "cat_vertical_speed": 0.5,
+          "cat_roll_pitch_speed": 1.0,
+          "cat_hip_yaw_limit": 0.35,
+          "cat_still_joint_tolerance": 0.25,
+          "cat_foot_xy_tolerance": 0.2,
+          "cat_min_base_height": 0.45,
+          "cat_min_upright_cos": 0.5
+        },
+        "target_base_height": 0.986,
+        "default_feet_xy": [
+          [
+            0.0,
+            0.101
+          ],
+          [
+            0.0,
+            -0.101
+          ]
+        ],
+        "nominal_joint_pos": [
+          2.3550000190734863,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          -0.10199999809265137,
+          0.0,
+          0.10199999809265137,
+          0.0,
+          -0.20000000298023224,
+          0.0,
+          -0.3199999928474426,
+          0.0,
+          0.3199999928474426,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.10199999809265137,
+          0.10199999809265137,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "step_dt": 0.02,
+        "reward": {
+          "linear": 1.0,
+          "yaw": 0.5,
+          "error_denominator": 0.25,
+          "multiply_dt": true
+        }
+      }
+    }
+  },
+  "observation_semantics": "flattened_actor_groups_before_actor_normalizer",
+  "actor_normalization_in_graph": true,
+  "action_semantics": "raw_deterministic_policy_action",
+  "wrapper_action_clip": null,
+  "checkpoint": {
+    "name": "model_10000.pt",
+    "sha256": "8f55f588c1582b2cbf70ab51613ee85eb4a6ded9ded37aafcaa6dd07e8dd5f07"
+  },
+  "onnx_sha256": "387c6170fef388437c85139abd2792bb005aa704d457831f1be2a4d233f69b22"
+}

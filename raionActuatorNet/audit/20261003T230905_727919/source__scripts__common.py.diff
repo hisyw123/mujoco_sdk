@@ -1,0 +1,11 @@
+--- /home/dongju/Downloads/actuator-net-gym-articulated-main/scripts/common.py
++++ /home/dongju/actuator-net-gym-articulated-main/scripts/common.py
+@@ -28,7 +28,7 @@
+ 
+ 
+ def joint_names(urdf, n):
+-    """Movable joints in URDF order, which is the order raisim uses. Falls back to indices."""
++    """Movable joints in URDF order, matching MuJoCo's imported order. Falls back to indices."""
+     try:
+         names = [j.get("name") for j in ET.parse(urdf).getroot().findall("joint")
+                  if j.get("type") in MOVABLE]

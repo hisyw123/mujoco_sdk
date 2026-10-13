@@ -1,0 +1,23 @@
+# Basic GREENY locomotion policy contract (31 current observations).
+num_joint: 8
+joint_idx_style: isaaclab_to_greeny
+joint_idx_conversion_isaaclab_to_greeny:
+  input:  [0, 4, 1, 5, 2, 6, 3, 7]
+  output: [0, 2, 4, 6, 1, 3, 5, 7]
+
+default_joint_angle: [0.0, -1.00881, 2.01762, 0.0,
+                      0.0,  1.00881, -2.01762, 0.0]
+
+scale:
+  dof_pos: 1.0
+  dof_vel: 0.05
+  ang_vel: 0.25
+  lin_vel: 2.0
+  action_scale: [0.25, 0.25, 0.25, 0.25,
+                 0.25, 0.25, 1.0, 1.0]
+
+action_clip: 100.0
+history_length: 10
+history_stride: 3
+policy_dt: 0.02
+obs_type: 0

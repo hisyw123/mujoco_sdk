@@ -41,6 +41,8 @@ list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 
 if(NOT EMSCRIPTEN)
   option(MUJOCO_BUILD_EXAMPLES "Build samples for MuJoCo" ON)
+  option(MUJOCO_BUILD_ROUGHTERRAIN3 "Build RoughTerrain3 ONNX runtime" OFF)
+  option(MUJOCO_BUILD_GREENY "Build the REAL-compatible GREENY runtime" OFF)
   option(MUJOCO_BUILD_SIMULATE "Build simulate library for MuJoCo" ON)
   option(MUJOCO_BUILD_STUDIO "Build studio library for MuJoCo" OFF)
   option(MUJOCO_BUILD_TESTS "Build tests for MuJoCo" ON)
@@ -277,6 +279,18 @@ endif()
 
 if(MUJOCO_BUILD_EXAMPLES)
   add_subdirectory(sample)
+endif()
+
+if(MUJOCO_BUILD_GREENY)
+  if(NOT MUJOCO_BUILD_SIMULATE)
+    message(FATAL_ERROR "MUJOCO_BUILD_GREENY requires MUJOCO_BUILD_SIMULATE for GLFW")
+  endif()
+  add_subdirectory(greeny)
+endif()
+
+if(MUJOCO_BUILD_ROUGHTERRAIN3)
+  include(CTest)
+  add_subdirectory(RoughTerrain3)
 endif()
 
 if(MUJOCO_WITH_USD)

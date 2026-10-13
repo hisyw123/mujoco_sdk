@@ -1,0 +1,20 @@
+# Robot/scene selection is kept separate from the reusable contracts.
+# Paths are resolved relative to this catalog file.
+robots:
+  greeny-12inch:
+    model: ../model/GREENY_12INCH/GREENY_12INCH.xml
+    motor_contract: ../motor/config/motors.yaml
+    policy_contract: rl_policy.yaml
+    default_mode: rl
+
+  rough-terrain-3:
+    model: ../../model/RoughTerrain-3/RoughTerrain-3_quadrupedal.xml
+    motor_contract: ../motor/config/rough_terrain_28dof.yaml
+    trajectory_contract: rough_terrain_joint_trajectory.yaml
+    default_mode: joint-trajectory
+
+  rough-terrain-3-bipedal:
+    model: ../../model/RoughTerrain-3/RoughTerrain-3_bipedal.xml
+    motor_contract: ../motor/config/rough_terrain_28dof.yaml
+    trajectory_contract: rough_terrain_joint_trajectory.yaml
+    default_mode: joint-trajectory

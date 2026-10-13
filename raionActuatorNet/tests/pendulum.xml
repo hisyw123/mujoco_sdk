@@ -1,0 +1,12 @@
+<mujoco model="TEST ONLY independent pendulums, not Raion">
+  <worldbody>
+    <body pos="0 0 1">
+      <joint name="joint_a" axis="0 1 0" range="-90 90"/>
+      <geom type="capsule" fromto="0 0 0 0 0 -0.3" size="0.03" mass="1"/>
+    </body>
+    <body pos="1 0 1">
+      <joint name="joint_b" axis="0 1 0" range="-90 90"/>
+      <geom type="capsule" fromto="0 0 0 0 0 -0.3" size="0.03" mass="1"/>
+    </body>
+  </worldbody>
+</mujoco>

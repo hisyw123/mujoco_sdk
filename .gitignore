@@ -21,6 +21,7 @@ build_cmake/
 build_host/
 build_wasm/
 build_simulate/
+build-greeny/
 python/dist/
 python/mujoco/include/
 python/mujoco/experimental/studio/assets/
@@ -48,3 +49,9 @@ MUJOCO_LOG.TXT
 wasm/**/dist/
 **/node_modules/
 
+# Local credentials, agent state and generated SDK dependencies
+/.aws/
+/.agents/
+/.codex/
+/build-sdk/
+/third_party/onnxruntime/

@@ -1,0 +1,23 @@
+{
+  "created": "2026-10-10",
+  "reference_implementation": "/home/dongju/mujoco/greeny",
+  "robotpc_reference": "/home/dongju/RobotPC_HRI_v1a_9.16_\ucd5c\uc2e0/RobotPC_HRI_v1a",
+  "files": [
+    {
+      "path": "/home/dongju/greeny/logs/rsl_rl/RoughTerrain3_cat_ppo/2026-10-06_22-30-56_cat_soft_contacts/exported/model_10000.onnx",
+      "sha256": "387c6170fef388437c85139abd2792bb005aa704d457831f1be2a4d233f69b22"
+    },
+    {
+      "path": "/home/dongju/greeny/logs/rsl_rl/RoughTerrain3_cat_ppo/2026-10-06_22-30-56_cat_soft_contacts/exported/model_10000.json",
+      "sha256": "41e4a6782c65b978889d5240e1f7f219c774a70adbab43236ffad78f5e4cea83"
+    },
+    {
+      "path": "/home/dongju/greeny/logs/rsl_rl/RoughTerrain3_cat_ppo/2026-10-06_22-30-56_cat_soft_contacts/params/env.yaml",
+      "sha256": "3348166ce9b17c69143098168f01c9abefec4701878148be9d1b1335f15405c6"
+    },
+    {
+      "path": "/home/dongju/mujoco/model/RoughTerrain-3/RoughTerrain-3_bipedal.xml",
+      "sha256": "92eafdbe54b6ed9048bd2e016f20fd5b83749b379e1ffca4c6f254661e0b348e"
+    }
+  ]
+}

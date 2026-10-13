@@ -1,0 +1,11 @@
+--- /home/dongju/Downloads/actuator-net-gym-articulated-main/scripts/train.py
++++ /home/dongju/actuator-net-gym-articulated-main/scripts/train.py
+@@ -2,7 +2,7 @@
+ """Train the ActuatorNet on one-step transition errors between a measured robot and the nominal model.
+ 
+ Inputs are measured robot logs (or replay CSVs already produced by `augmented_sim replay`, detected
+-by the err_tau_0 column). For every measured state the C++ tool integrates the nominal RaiSim model
++by the err_tau_0 column). For every measured state the C++ tool integrates the nominal MuJoCo model
+ one control tick and reports the torque that would have reproduced the measured velocity change
+ (err_tau). The net learns err_tau from the joint history; the TorchScript it writes drives
+ `augmented_sim rollout`.

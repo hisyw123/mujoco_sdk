@@ -1,0 +1,147 @@
+--- /home/dongju/Downloads/actuator-net-gym-articulated-main/src/augmented_sim.cpp
++++ /home/dongju/actuator-net-gym-articulated-main/src/augmented_sim.cpp
+@@ -1,4 +1,4 @@
+-// ActuatorNet-augmented RaiSim simulator for a fixed-base articulated system.
++// ActuatorNet-augmented MuJoCo simulator for a fixed-base articulated system.
+ //
+ //   augmented_sim replay  <log.csv> <out.csv> --urdf robot.urdf [opts]
+ //       one-step transitions from every logged state -> training targets (err_tau)
+@@ -28,7 +28,7 @@
+ // The joint count comes from the file and must match the URDF's degrees of freedom.
+ // By default each integration step uses that row's own dt, so a jittering log is replayed on its
+ // true time base instead of an averaged one; --steps and --fixed-dt override that.
+-#include <raisim/World.hpp>
++#include <mujoco/mujoco.h>
+ #include <torch/script.h>
+ #include <ATen/Parallel.h>
+ #include <Eigen/Core>
+@@ -188,49 +188,60 @@
+ };
+ 
+ struct Sim {
+-  raisim::World world;
+-  raisim::ArticulatedSystem* robot = nullptr;
++  struct ModelDeleter { void operator()(mjModel* p) const { mj_deleteModel(p); } };
++  struct DataDeleter { void operator()(mjData* p) const { mj_deleteData(p); } };
++  std::unique_ptr<mjModel, ModelDeleter> model;
++  std::unique_ptr<mjData, DataDeleter> data;
+   int nJ = 0;
+-  Eigen::VectorXd kp, kd, zero;
++  Eigen::VectorXd kp, kd;
+ 
+   Sim(const Opt& o, int nJoints) : nJ(nJoints) {
+-    std::ifstream f(o.urdf);
+-    if (!f) throw std::runtime_error("cannot open urdf " + o.urdf);
+-    std::stringstream ss;
+-    ss << f.rdbuf();
+-    std::string urdf = ss.str();
+-    // Fixed base: raisim treats a link named "world" joined rigidly to the root as a fixed base
+-    // (see raisimLib/rsc/kinova). Root = first <link> in the file. Skipped if the URDF already
+-    // defines its own world link.
+-    if (urdf.find("\"world\"") == std::string::npos) {
+-      auto p = urdf.find("<link");
+-      p = urdf.find("name=\"", p) + 6;
+-      const std::string root = urdf.substr(p, urdf.find('"', p) - p);
+-      urdf.insert(urdf.rfind("</robot>"),
+-                  "<link name=\"world\"/><joint name=\"world_to_" + root + "\" type=\"fixed\">"
+-                  "<parent link=\"world\"/><child link=\"" + root + "\"/></joint>\n");
+-      std::cout << "fixed base added at root link " << root << '\n';
+-    }
+-    const auto slash = o.urdf.rfind('/');
+-    const std::string meshDir = slash == std::string::npos ? "." : o.urdf.substr(0, slash) + "/../meshes";
+-    robot = world.addArticulatedSystem(urdf, meshDir);
+-    if (static_cast<int>(robot->getGeneralizedCoordinateDim()) != nJ)
+-      throw std::runtime_error("urdf has " + std::to_string(robot->getGeneralizedCoordinateDim()) +
+-                               " generalized coordinates, the log has " + std::to_string(nJ) +
+-                               " joints. A floating base is not supported.");
++    char error[1024] = {};
++    model.reset(mj_loadXML(o.urdf.c_str(), nullptr, error, sizeof(error)));
++    if (!model) throw std::runtime_error("cannot load URDF " + o.urdf + ": " + error);
++    if (model->nq != nJ || model->nv != nJ)
++      throw std::runtime_error("URDF has nq=" + std::to_string(model->nq) +
++                               ", nv=" + std::to_string(model->nv) + ", but the log has " +
++                               std::to_string(nJ) +
++                               " joints. Only a fixed base with 1-DoF joints is supported.");
++    for (int j = 0; j < model->njnt; ++j)
++      if (model->jnt_type[j] != mjJNT_HINGE && model->jnt_type[j] != mjJNT_SLIDE)
++        throw std::runtime_error("only hinge/revolute and slide/prismatic joints are supported");
++    data.reset(mj_makeData(model.get()));
++    if (!data) throw std::runtime_error("MuJoCo could not allocate simulation data");
+     kp = Eigen::VectorXd::Constant(nJ, o.kp);
+     kd = Eigen::VectorXd::Constant(nJ, o.kd);
+-    zero = Eigen::VectorXd::Zero(nJ);
+-    robot->setPdGains(kp, kd);   // PD_PLUS_FEEDFORWARD_TORQUE
+-    std::cout << nJ << " joints, kp=" << o.kp << " kd=" << o.kd << '\n';
+-  }
+-
+-  // Each transition is integrated with its own dt, taken from the log.
++    std::cout << nJ << " joints, MuJoCo " << mj_versionString()
++              << ", kp=" << o.kp << " kd=" << o.kd << '\n';
++  }
++
++  void setState(const Eigen::VectorXd& q, const Eigen::VectorXd& u) {
++    Eigen::Map<Eigen::VectorXd>(data->qpos, nJ) = q;
++    Eigen::Map<Eigen::VectorXd>(data->qvel, nJ) = u;
++    mj_forward(model.get(), data.get());
++  }
++
++  void getState(Eigen::VectorXd& q, Eigen::VectorXd& u) const {
++    q = Eigen::Map<const Eigen::VectorXd>(data->qpos, nJ);
++    u = Eigen::Map<const Eigen::VectorXd>(data->qvel, nJ);
++  }
++
++  Eigen::MatrixXd massMatrix() const {
++    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> dense(nJ, nJ);
++    #if mjVERSION_HEADER >= 3014000
++    mj_fullM(model.get(), data.get(), dense.data());
++#else
++    mj_fullM(model.get(), dense.data(), data->qM);
++#endif
++    return Eigen::MatrixXd(dense);
++  }
++
+   void step(double dt, const Eigen::VectorXd& pTarget, const Eigen::VectorXd& ff) {
+-    world.setTimeStep(dt);
+-    robot->setPdTarget(pTarget, zero);
+-    robot->setGeneralizedForce(ff);
+-    world.integrate();
++    model->opt.timestep = dt;
++    Eigen::Map<Eigen::VectorXd>(data->qfrc_applied, nJ) =
++        kp.cwiseProduct(pTarget - Eigen::Map<const Eigen::VectorXd>(data->qpos, nJ)) -
++        kd.cwiseProduct(Eigen::Map<const Eigen::VectorXd>(data->qvel, nJ)) + ff;
++    mj_step(model.get(), data.get());
+   }
+ };
+ 
+@@ -289,8 +300,8 @@
+         : Eigen::VectorXd(sim.kp.cwiseProduct(p - q) - sim.kd.cwiseProduct(u));
+     if (net) ff = net->predict(makeStep(p - q, u, tau));
+     if (!o.ffCol.empty()) ff = in.vec(t0, o.ffCol + "_");
+-    sim.robot->setState(q, u);
+-    const Eigen::MatrixXd M = sim.robot->getMassMatrix().e();
++    sim.setState(q, u);
++    const Eigen::MatrixXd M = sim.massMatrix();
+     // the feedforward torque is held across the interval; the PD target still follows the log tick
+     // by tick, because that is what the real controller did
+     const double T = in.t(t0 + S) - in.t(t0);
+@@ -301,7 +312,7 @@
+       // physics finer than the network: follow the log tick by tick, target and all
+       for (size_t i = 0; i < S; ++i) sim.step(in.dt(t0 + i), in.vec(t0 + i, "ptarget_"), ff);
+     }
+-    sim.robot->getState(qs, us);
++    sim.getState(qs, us);
+     const Eigen::VectorXd errQ = in.vec(t0 + S, "gc_") - qs, errU = in.vec(t0 + S, "gv_") - us;
+     // Torque that would have produced the measured velocity change over this interval. tau = M*a + h,
+     // but both transitions start from the same state, so h(q,u) is identical in each and cancels in
+@@ -401,9 +412,9 @@
+   const size_t n = ticks.size();
+   const size_t S = plan.predEvery;
+   Eigen::VectorXd qs(nJ), us(nJ), ff = Eigen::VectorXd::Zero(nJ), sqQ = ff, sqU = ff;
+-  sim.robot->setState(ticks[0].q, ticks[0].u);
++  sim.setState(ticks[0].q, ticks[0].u);
+   for (size_t t = 0; t < n; ++t) {
+-    sim.robot->getState(qs, us);
++    sim.getState(qs, us);
+     const Tick& k = ticks[t];
+     // the network runs once per interval and its torque is held in between; physics runs every step
+     if (t % S == 0 && t + 1 < n) {

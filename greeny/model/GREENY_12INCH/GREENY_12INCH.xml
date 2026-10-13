@@ -1,0 +1,1245 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<mujoco model="GREENY_12INCH_URDF_SYNCED">
+
+  <!--
+    Coordinate convention:
+      +X forward
+      +Y left
+      +Z up
+
+    Joint / actuator / controller order:
+      0 LHY_J
+      1 LHP_J
+      2 LKP_J
+      3 LWP_J
+      4 RHY_J
+      5 RHP_J
+      6 RKP_J
+      7 RWP_J
+
+    Base:
+      visual    = box primitive
+      collision = box primitive
+      base STL  = disabled
+
+    Leg links:
+      visual    = STL mesh
+      collision = STL mesh
+
+    Wheels:
+      visual    = STL mesh
+      collision = cylinder primitive
+
+    Ground:
+      ground_visual    = visible checker plane
+      ground_collision = invisible physical plane
+  -->
+
+
+  <!-- ============================================================ -->
+  <!-- Compiler / statistics                                        -->
+  <!-- ============================================================ -->
+
+  <compiler angle="radian"
+            inertiafromgeom="false"
+            meshdir="."/>
+
+  <statistic center="0 0 0.35"
+             extent="1.2"/>
+
+  <size njmax="1000"
+        nconmax="300"/>
+
+
+  <!-- ============================================================ -->
+  <!-- Simulation                                                    -->
+  <!-- ============================================================ -->
+
+  <option timestep="0.0005"
+          gravity="0 0 -9.81"
+          integrator="implicitfast"
+          solver="Newton"
+          iterations="150"
+          tolerance="1e-10">
+
+    <!-- Use the pre-native convex collision path to match MuJoCo 3.2.2 more
+         closely.  Disabling islands also removes a solver-path difference
+         introduced after 3.2.2. -->
+    <flag contact="enable"
+          gravity="enable"
+          nativeccd="disable"
+          island="disable"/>
+
+  </option>
+
+
+  <!-- ============================================================ -->
+  <!-- Defaults                                                      -->
+  <!-- ============================================================ -->
+
+  <default>
+
+    <joint damping="0.0"
+           armature="0.02"
+           frictionloss="0.1"/>
+
+    <motor ctrllimited="true"
+           ctrlrange="-90.8 90.8"/>
+
+    <default class="visualgeom">
+      <geom contype="0"
+            conaffinity="0"
+            group="1"
+            density="0"
+            material="robot_visual"/>
+    </default>
+
+    <default class="contactgeom">
+      <geom contype="1"
+            conaffinity="1"
+            group="3"
+            condim="3"
+            friction="1.0 0.01 0.001"
+            solref="0.001 1"
+            solimp="0.99 0.999 0.0005"/>
+    </default>
+
+  </default>
+
+
+  <!-- ============================================================ -->
+  <!-- Viewer                                                        -->
+  <!-- ============================================================ -->
+
+  <visual>
+
+      <global azimuth="135"
+            elevation="-20"
+            fovy="42"/>
+
+      <headlight ambient="0.60 0.60 0.60"
+                  diffuse="0.90 0.90 0.90"
+                  specular="0.25 0.25 0.25"/>
+
+      <quality shadowsize="4096"
+            offsamples="4"/>
+
+      <!-- 추가 -->
+      <map force="0.001"/>
+
+      <rgba haze="0.22 0.26 0.32 1"
+            com="0.502 1.0 0 0.5"
+            contactpoint="1.0 1.0 0.6 0.5"
+            contactforce="0.2 0.98 0.2 0.8"/>
+
+      <scale com="0.15"
+            forcewidth="0.025"
+            contactwidth="0.08"
+            contactheight="0.03"/>
+
+      </visual>
+
+
+  <!-- ============================================================ -->
+  <!-- Assets                                                        -->
+  <!-- ============================================================ -->
+
+  <asset>
+
+    <!-- Bright sky/background -->
+    <texture name="skybox"
+             type="skybox"
+             builtin="gradient"
+             rgb1="0.55 0.68 0.82"
+             rgb2="0.22 0.26 0.32"
+             width="512"
+             height="3072"/>
+
+    <!-- Base STL intentionally disabled -->
+    <!--
+    <mesh name="base_link_mesh"
+          file="meshes/base_link.STL"/>
+    -->
+
+    <mesh name="LHY_fix_mesh"
+          file="meshes/LHY_fix.STL"/>
+
+    <mesh name="LHY_mesh"
+          file="meshes/LHY.STL"/>
+
+    <mesh name="LHP_mesh"
+          file="meshes/LHP.STL"/>
+
+    <mesh name="LKP_mesh"
+          file="meshes/LKP.STL"/>
+
+    <mesh name="LWP_mesh"
+          file="meshes/LWP.STL"/>
+
+    <mesh name="RHY_fix_mesh"
+          file="meshes/RHY_fix.STL"/>
+
+    <mesh name="RHY_mesh"
+          file="meshes/RHY.STL"/>
+
+    <mesh name="RHP_mesh"
+          file="meshes/RHP.STL"/>
+
+    <mesh name="RKP_mesh"
+          file="meshes/RKP.STL"/>
+
+    <mesh name="RWP_mesh"
+          file="meshes/RWP.STL"/>
+
+
+    <!-- Ground texture -->
+    <texture name="ground_tex"
+             type="2d"
+             builtin="checker"
+             rgb1="0.32 0.35 0.40"
+             rgb2="0.72 0.75 0.80"
+             mark="edge"
+             markrgb="0.90 0.90 0.90"
+             width="512"
+             height="512"/>
+
+    <material name="ground_mat"
+              texture="ground_tex"
+              texrepeat="8 8"
+              texuniform="true"
+              reflectance="0.08"
+              specular="0.10"
+              shininess="0.15"/>
+
+
+    <!-- Robot materials -->
+    <material name="robot_visual"
+              rgba="0.72 0.78 0.86 1"
+              specular="0.45"
+              shininess="0.65"
+              reflectance="0.12"/>
+
+    <material name="hip_visual"
+              rgba="0.72 0.82 0.98 1"
+              specular="0.40"
+              shininess="0.60"
+              reflectance="0.10"/>
+
+    <material name="leg_visual"
+              rgba="0.28 0.82 0.40 1"
+              specular="0.35"
+              shininess="0.55"
+              reflectance="0.08"/>
+
+    <material name="wheel_visual"
+              rgba="0.035 0.035 0.040 1"
+              specular="0.28"
+              shininess="0.35"
+              reflectance="0.04"/>
+
+    <material name="base_visual_material"
+              rgba="0.42 0.48 0.58 1"
+              specular="0.40"
+              shininess="0.55"
+              reflectance="0.10"/>
+
+    <hfield name="campus_terrain" file="campus_heightmap.png" size="50 50 1.5 0.1"/>
+
+    <!-- 새로 추가할 아스팔트 재질 -->
+    <material name="asphalt_mat"
+            rgba="0.08 0.08 0.085 1"
+            specular="0.05"
+            shininess="0.05"
+            reflectance="0.02"/>
+
+  </asset>
+
+
+  <!-- ============================================================ -->
+  <!-- World                                                         -->
+  <!-- ============================================================ -->
+
+  <worldbody>
+
+    <!-- Main key light -->
+    <light name="key_light"
+           directional="true"
+           pos="2.5 -2.5 4.0"
+           dir="-0.45 0.45 -1.0"
+           diffuse="1.00 1.00 1.00"
+           specular="0.30 0.30 0.30"
+           castshadow="true"/>
+
+    <!-- Opposite fill light -->
+    <light name="fill_light"
+           directional="true"
+           pos="-2.5 2.0 3.0"
+           dir="0.50 -0.40 -0.85"
+           diffuse="0.75 0.78 0.85"
+           specular="0.08 0.08 0.08"
+           castshadow="false"/>
+
+    <!-- Viewer/front-side light -->
+    <light name="front_light"
+           directional="true"
+           pos="1.5 -3.0 2.0"
+           dir="-0.20 0.80 -0.35"
+           diffuse="0.65 0.68 0.72"
+           specular="0.10 0.10 0.10"
+           castshadow="false"/>
+
+    <!-- Silhouette/rim light -->
+    <light name="rim_light"
+           directional="true"
+           pos="-2.5 -2.5 3.0"
+           dir="0.55 0.55 -0.75"
+           diffuse="0.55 0.60 0.72"
+           specular="0.14 0.14 0.16"
+           castshadow="false"/>
+
+    <!-- Vertical soft light -->
+    <light name="top_soft_light"
+           directional="true"
+           pos="0 0 5.0"
+           dir="0 0 -1"
+           diffuse="0.55 0.55 0.58"
+           specular="0.10 0.10 0.10"
+           castshadow="false"/>
+
+
+    <!-- Camera tracks base orientation/location -->
+    <camera name="debug_camera"
+            mode="targetbody"
+            target="base_link"
+            pos="1.55 -1.75 1.15"
+            fovy="38"/>
+
+
+    <!-- Visible ground -->
+    <geom name="ground_visual"
+          type="plane"
+          pos="0 0 0"
+          size="1000 1000 0.1"
+          material="ground_mat"
+          contype="0"
+          conaffinity="0"
+          group="0"
+          rgba="0.65 0.68 0.72 1"/>
+
+    <!-- Invisible physical ground -->
+    <geom name="ground_collision"
+          type="plane"
+          pos="0 0 0"
+          size="1000 1000 0.1"
+          contype="1"
+          conaffinity="1"
+          group="3"
+          condim="3"
+          friction="1.0 0.01 0.001"
+          solref="0.004 1"
+          solimp="0.9 0.95 0.001"
+          rgba="0 0 0 0"/>
+
+
+    <!-- ========================================================== -->
+    <!-- Four stair pyramids based on GREENY_UPSTAIRS_ONLY_CFG      -->
+    <!-- ========================================================== -->
+
+
+    <!-- ========================================================== -->
+    <!-- 1. NARROW                                                  -->
+    <!-- step height = 0.12 m                                       -->
+    <!-- tread depth = 0.25 m                                       -->
+    <!-- top platform = 2.5 x 2.5 m                                 -->
+    <!-- center = (+5.0, +5.0)                                      -->
+    <!-- ========================================================== -->
+
+    <body name="stairs_pyramid_narrow"
+          pos="5.0 5.0 0">
+
+      <geom name="narrow_level_1"
+            type="box"
+            pos="0 0 0.06"
+            size="2.00 2.00 0.06"
+            class="contactgeom"
+            group="0"
+            material="ground_mat"/>
+
+      <geom name="narrow_level_2"
+            type="box"
+            pos="0 0 0.12"
+            size="1.75 1.75 0.12"
+            class="contactgeom"
+            group="0"
+            material="ground_mat"/>
+
+      <geom name="narrow_level_3"
+            type="box"
+            pos="0 0 0.18"
+            size="1.50 1.50 0.18"
+            class="contactgeom"
+            group="0"
+            material="ground_mat"/>
+
+      <geom name="narrow_level_4"
+            type="box"
+            pos="0 0 0.24"
+            size="1.25 1.25 0.24"
+            class="contactgeom"
+            group="0"
+            material="ground_mat"/>
+
+    </body>
+
+
+    <!-- ========================================================== -->
+    <!-- 2. MEDIUM                                                  -->
+    <!-- step height = 0.14 m                                       -->
+    <!-- tread depth = 0.35 m                                       -->
+    <!-- top platform = 2.5 x 2.5 m                                 -->
+    <!-- center = (-5.0, +5.0)                                      -->
+    <!-- ========================================================== -->
+
+    <body name="stairs_pyramid_medium"
+          pos="-5.0 5.0 0">
+
+      <geom name="medium_level_1"
+            type="box"
+            pos="0 0 0.07"
+            size="2.30 2.30 0.07"
+            class="contactgeom"
+            group="0"
+            material="ground_mat"/>
+
+      <geom name="medium_level_2"
+            type="box"
+            pos="0 0 0.14"
+            size="1.95 1.95 0.14"
+            class="contactgeom"
+            group="0"
+            material="ground_mat"/>
+
+      <geom name="medium_level_3"
+            type="box"
+            pos="0 0 0.21"
+            size="1.60 1.60 0.21"
+            class="contactgeom"
+            group="0"
+            material="ground_mat"/>
+
+      <geom name="medium_level_4"
+            type="box"
+            pos="0 0 0.28"
+            size="1.25 1.25 0.28"
+            class="contactgeom"
+            group="0"
+            material="ground_mat"/>
+
+    </body>
+
+
+    <!-- ========================================================== -->
+    <!-- 3. WIDE                                                    -->
+    <!-- step height = 0.16 m                                       -->
+    <!-- tread depth = 0.45 m                                       -->
+    <!-- top platform = 2.5 x 2.5 m                                 -->
+    <!-- center = (+5.0, -5.0)                                      -->
+    <!-- ========================================================== -->
+
+    <body name="stairs_pyramid_wide"
+          pos="5.0 -5.0 0">
+
+      <geom name="wide_level_1"
+            type="box"
+            pos="0 0 0.08"
+            size="2.60 2.60 0.08"
+            class="contactgeom"
+            group="0"
+            material="ground_mat"/>
+
+      <geom name="wide_level_2"
+            type="box"
+            pos="0 0 0.16"
+            size="2.15 2.15 0.16"
+            class="contactgeom"
+            group="0"
+            material="ground_mat"/>
+
+      <geom name="wide_level_3"
+            type="box"
+            pos="0 0 0.24"
+            size="1.70 1.70 0.24"
+            class="contactgeom"
+            group="0"
+            material="ground_mat"/>
+
+      <geom name="wide_level_4"
+            type="box"
+            pos="0 0 0.32"
+            size="1.25 1.25 0.32"
+            class="contactgeom"
+            group="0"
+            material="ground_mat"/>
+
+    </body>
+
+
+    <!-- ========================================================== -->
+    <!-- 4. VERY WIDE                                               -->
+    <!-- step height = 0.16 m                                       -->
+    <!-- tread depth = 0.55 m                                       -->
+    <!-- top platform = 2.5 x 2.5 m                                 -->
+    <!-- center = (-5.0, -5.0)                                      -->
+    <!-- ========================================================== -->
+
+    <body name="stairs_pyramid_very_wide"
+          pos="-5.0 -5.0 0">
+
+      <geom name="very_wide_level_1"
+            type="box"
+            pos="0 0 0.08"
+            size="2.90 2.90 0.08"
+            class="contactgeom"
+            group="0"
+            material="ground_mat"/>
+
+      <geom name="very_wide_level_2"
+            type="box"
+            pos="0 0 0.16"
+            size="2.35 2.35 0.16"
+            class="contactgeom"
+            group="0"
+            material="ground_mat"/>
+
+      <geom name="very_wide_level_3"
+            type="box"
+            pos="0 0 0.24"
+            size="1.80 1.80 0.24"
+            class="contactgeom"
+            group="0"
+            material="ground_mat"/>
+
+      <geom name="very_wide_level_4"
+            type="box"
+            pos="0 0 0.32"
+            size="1.25 1.25 0.32"
+            class="contactgeom"
+            group="0"
+            material="ground_mat"/>
+
+    </body>
+
+
+    <!-- ========================================================== -->
+    <!-- Speed bumps                                                -->
+    <!-- ========================================================== -->
+
+    <geom name="speed_bump_1"
+          type="cylinder"
+          size="16.25 3.00"
+          pos="15.0 0 -16.15"
+          quat="0.70710678 0.70710678 0 0"
+          class="contactgeom"
+          group="0"
+          friction="1.0 0.01 0.001"
+          rgba="0.95 0.65 0.05 1"/>
+
+    <geom name="speed_bump_2"
+          type="cylinder"
+          size="16.25 3.00"
+          pos="25.0 0 -16.15"
+          quat="0.70710678 0.70710678 0 0"
+          class="contactgeom"
+          group="0"
+          friction="1.0 0.01 0.001"
+          rgba="0.95 0.65 0.05 1"/>
+
+    <geom name="speed_bump_3"
+          type="cylinder"
+          size="16.25 3.00"
+          pos="35.0 0 -16.15"
+          quat="0.70710678 0.70710678 0 0"
+          class="contactgeom"
+          group="0"
+          friction="1.0 0.01 0.001"
+          rgba="0.95 0.65 0.05 1"/>
+
+    <geom name="speed_bump_4"
+          type="cylinder"
+          size="16.25 3.00"
+          pos="45.0 0 -16.15"
+          quat="0.70710678 0.70710678 0 0"
+          class="contactgeom"
+          group="0"
+          friction="1.0 0.01 0.001"
+          rgba="0.95 0.65 0.05 1"/>
+
+    <geom name="speed_bump_5"
+          type="cylinder"
+          size="16.25 3.00"
+          pos="55.0 0 -16.15"
+          quat="0.70710678 0.70710678 0 0"
+          class="contactgeom"
+          group="0"
+          friction="1.0 0.01 0.001"
+          rgba="0.95 0.65 0.05 1"/>
+
+
+    <!-- ========================================================== -->
+    <!-- Main 45-degree mountain course                             -->
+    <!-- ========================================================== -->
+
+    <!-- 45-degree uphill -->
+    <!-- <geom name="mountain_upslope_45"
+          type="box"
+          size="14.142136 5.0 0.25"
+          pos="80.176777 0 9.823223"
+          quat="0.92387953 0 -0.38268343 0"
+          class="contactgeom"
+          group="0"
+          friction="1.2 0.01 0.001"
+          rgba="0.38 0.30 0.20 1"/> -->
+
+    <!-- 10 m top platform -->
+    <!-- <geom name="mountain_top_platform"
+          type="box"
+          size="5.0 5.0 0.25"
+          pos="95.0 0 19.75"
+          class="contactgeom"
+          group="0"
+          friction="1.2 0.01 0.001"
+          rgba="0.38 0.30 0.20 1"/> -->
+
+    <!-- 45-degree downhill -->
+    <!-- <geom name="mountain_downslope_45"
+          type="box"
+          size="14.142136 5.0 0.25"
+          pos="109.823223 0 9.823223"
+          quat="0.92387953 0 0.38268343 0"
+          class="contactgeom"
+          group="0"
+          friction="1.2 0.01 0.001"
+          rgba="0.38 0.30 0.20 1"/> -->
+      
+    <!-- 기존 코드를 유지하면서 지형을 추가하거나 대체합니다 -->
+    <!-- <geom name="campus_ground"
+      type="hfield"
+      hfield="campus_terrain"
+      material="asphalt_mat"
+      pos="150 50 0"         
+      contype="1"
+      conaffinity="1"
+      group="0"           
+      condim="3"
+      friction="1.0 0.01 0.001"
+      solref="0.004 1"
+      solimp="0.9 0.95 0.001"/> -->
+
+
+    <!-- ========================================================== -->
+    <!-- Side mountain course                                      -->
+    <!-- Center Y: 12 m                                            -->
+    <!-- Width: 10 m                                               -->
+    <!-- ========================================================== -->
+
+    <!-- <body name="side_mountain_course"> -->
+
+      <!-- 30-degree uphill -->
+      <!-- <geom name="side_slope_30"
+            type="box"
+            size="5.0 5.0 0.25"
+            pos="74.455127 12.0 2.283494"
+            quat="0.96592583 0 -0.25881905 0"
+            class="contactgeom"
+            group="0"
+            friction="1.2 0.01 0.001"
+            rgba="0.42 0.34 0.24 1"/> -->
+
+      <!-- Top platform -->
+      <!-- <geom name="side_top_platform"
+            type="box"
+            size="5.0 5.0 0.25"
+            pos="83.660254 12.0 4.75"
+            class="contactgeom"
+            group="0"
+            friction="1.2 0.01 0.001"
+            rgba="0.42 0.34 0.24 1"/> -->
+
+
+      <!-- Descending stairs: 25 treads -->
+      <!-- <geom name="side_stair_01" type="box" size="0.20 5.0 2.50" pos="88.860254 12.0 2.50" class="contactgeom" group="0" friction="1.2 0.01 0.001" rgba="0.42 0.34 0.24 1"/>
+      <geom name="side_stair_02" type="box" size="0.20 5.0 2.40" pos="89.260254 12.0 2.40" class="contactgeom" group="0" friction="1.2 0.01 0.001" rgba="0.42 0.34 0.24 1"/>
+      <geom name="side_stair_03" type="box" size="0.20 5.0 2.30" pos="89.660254 12.0 2.30" class="contactgeom" group="0" friction="1.2 0.01 0.001" rgba="0.42 0.34 0.24 1"/>
+      <geom name="side_stair_04" type="box" size="0.20 5.0 2.20" pos="90.060254 12.0 2.20" class="contactgeom" group="0" friction="1.2 0.01 0.001" rgba="0.42 0.34 0.24 1"/>
+      <geom name="side_stair_05" type="box" size="0.20 5.0 2.10" pos="90.460254 12.0 2.10" class="contactgeom" group="0" friction="1.2 0.01 0.001" rgba="0.42 0.34 0.24 1"/>
+      <geom name="side_stair_06" type="box" size="0.20 5.0 2.00" pos="90.860254 12.0 2.00" class="contactgeom" group="0" friction="1.2 0.01 0.001" rgba="0.42 0.34 0.24 1"/>
+      <geom name="side_stair_07" type="box" size="0.20 5.0 1.90" pos="91.260254 12.0 1.90" class="contactgeom" group="0" friction="1.2 0.01 0.001" rgba="0.42 0.34 0.24 1"/>
+      <geom name="side_stair_08" type="box" size="0.20 5.0 1.80" pos="91.660254 12.0 1.80" class="contactgeom" group="0" friction="1.2 0.01 0.001" rgba="0.42 0.34 0.24 1"/>
+      <geom name="side_stair_09" type="box" size="0.20 5.0 1.70" pos="92.060254 12.0 1.70" class="contactgeom" group="0" friction="1.2 0.01 0.001" rgba="0.42 0.34 0.24 1"/>
+      <geom name="side_stair_10" type="box" size="0.20 5.0 1.60" pos="92.460254 12.0 1.60" class="contactgeom" group="0" friction="1.2 0.01 0.001" rgba="0.42 0.34 0.24 1"/>
+      <geom name="side_stair_11" type="box" size="0.20 5.0 1.50" pos="92.860254 12.0 1.50" class="contactgeom" group="0" friction="1.2 0.01 0.001" rgba="0.42 0.34 0.24 1"/>
+      <geom name="side_stair_12" type="box" size="0.20 5.0 1.40" pos="93.260254 12.0 1.40" class="contactgeom" group="0" friction="1.2 0.01 0.001" rgba="0.42 0.34 0.24 1"/>
+      <geom name="side_stair_13" type="box" size="0.20 5.0 1.30" pos="93.660254 12.0 1.30" class="contactgeom" group="0" friction="1.2 0.01 0.001" rgba="0.42 0.34 0.24 1"/>
+      <geom name="side_stair_14" type="box" size="0.20 5.0 1.20" pos="94.060254 12.0 1.20" class="contactgeom" group="0" friction="1.2 0.01 0.001" rgba="0.42 0.34 0.24 1"/>
+      <geom name="side_stair_15" type="box" size="0.20 5.0 1.10" pos="94.460254 12.0 1.10" class="contactgeom" group="0" friction="1.2 0.01 0.001" rgba="0.42 0.34 0.24 1"/>
+      <geom name="side_stair_16" type="box" size="0.20 5.0 1.00" pos="94.860254 12.0 1.00" class="contactgeom" group="0" friction="1.2 0.01 0.001" rgba="0.42 0.34 0.24 1"/>
+      <geom name="side_stair_17" type="box" size="0.20 5.0 0.90" pos="95.260254 12.0 0.90" class="contactgeom" group="0" friction="1.2 0.01 0.001" rgba="0.42 0.34 0.24 1"/>
+      <geom name="side_stair_18" type="box" size="0.20 5.0 0.80" pos="95.660254 12.0 0.80" class="contactgeom" group="0" friction="1.2 0.01 0.001" rgba="0.42 0.34 0.24 1"/>
+      <geom name="side_stair_19" type="box" size="0.20 5.0 0.70" pos="96.060254 12.0 0.70" class="contactgeom" group="0" friction="1.2 0.01 0.001" rgba="0.42 0.34 0.24 1"/>
+      <geom name="side_stair_20" type="box" size="0.20 5.0 0.60" pos="96.460254 12.0 0.60" class="contactgeom" group="0" friction="1.2 0.01 0.001" rgba="0.42 0.34 0.24 1"/>
+      <geom name="side_stair_21" type="box" size="0.20 5.0 0.50" pos="96.860254 12.0 0.50" class="contactgeom" group="0" friction="1.2 0.01 0.001" rgba="0.42 0.34 0.24 1"/>
+      <geom name="side_stair_22" type="box" size="0.20 5.0 0.40" pos="97.260254 12.0 0.40" class="contactgeom" group="0" friction="1.2 0.01 0.001" rgba="0.42 0.34 0.24 1"/>
+      <geom name="side_stair_23" type="box" size="0.20 5.0 0.30" pos="97.660254 12.0 0.30" class="contactgeom" group="0" friction="1.2 0.01 0.001" rgba="0.42 0.34 0.24 1"/>
+      <geom name="side_stair_24" type="box" size="0.20 5.0 0.20" pos="98.060254 12.0 0.20" class="contactgeom" group="0" friction="1.2 0.01 0.001" rgba="0.42 0.34 0.24 1"/>
+      <geom name="side_stair_25" type="box" size="0.20 5.0 0.10" pos="98.460254 12.0 0.10" class="contactgeom" group="0" friction="1.2 0.01 0.001" rgba="0.42 0.34 0.24 1"/> -->
+
+    <!-- </body> -->
+
+
+
+
+    <!-- ========================================================== -->
+    <!-- Robot base                                                 -->
+    <!-- ========================================================== -->
+
+    <body name="base_link"
+          pos="0 0 0.9"
+          quat="1 0 0 0">
+
+      <freejoint name="root"/>
+
+      <!-- URDF:
+           mass = 10.75 kg
+           COM  = (-0.0038049, 0.0037938, -0.0050641)
+      -->
+      <inertial pos="-0.0038049 0.0037938 -0.0050641"
+                mass="10.75"
+                fullinertia="0.19354 0.08845 0.15635 0.00005 0.00051 0.00101"/>
+
+
+      <!-- IMU aligned with base frame -->
+      <site name="imu"
+            type="sphere"
+            size="0.008"
+            pos="0.06 0 0.05"
+            quat="1 0 0 0"
+            rgba="1 0.1 0.1 1"/>
+
+
+      <!-- Base STL disabled -->
+      <!--
+      <geom name="base_visual_mesh"
+            type="mesh"
+            mesh="base_link_mesh"
+            class="visualgeom"
+            material="base_visual_material"/>
+      -->
+
+
+      <!-- Base box visual -->
+      <geom name="base_visual_box"
+            type="box"
+            size="0.08 0.205 0.125"
+            pos="0 0 0"
+            quat="1 0 0 0"
+            class="visualgeom"
+            material="base_visual_material"/>
+
+      <!-- Base box collision -->
+      <geom name="base_collision"
+            type="box"
+            size="0.08 0.205 0.125"
+            pos="0 0 0"
+            quat="1 0 0 0"
+            class="contactgeom"
+            rgba="0.25 0.30 0.38 0.22"/>
+
+
+      <!-- ======================================================== -->
+      <!-- Left leg                                                 -->
+      <!-- ======================================================== -->
+
+      <body name="LHY_fix"
+            pos="0 0 0"
+            quat="1 0 0 0">
+
+        <inertial pos="2.8262E-05 0.12497 -0.15053"
+                  mass="1.9274"
+                  fullinertia="0.00247 0.00246 0.00372 0 0 0"/>
+
+        <geom name="LHY_fix_visual"
+              type="mesh"
+              mesh="LHY_fix_mesh"
+              class="visualgeom"
+              material="hip_visual"/>
+
+        <geom name="LHY_fix_collision"
+              type="mesh"
+              mesh="LHY_fix_mesh"
+              class="contactgeom"
+              rgba="0.55 0.65 0.85 0.18"/>
+
+
+        <body name="LHY"
+              pos="0 0.125 -0.1864"
+              quat="1 0 0 0">
+
+          <joint name="LHY_J"
+                 type="hinge"
+                 pos="0 0 0"
+                 axis="0 0 1"
+                 limited="true"
+                 range="-1 1"/>
+
+          <inertial pos="3.6646E-05 -0.030758 -0.069704"
+                    mass="2.0648"
+                    fullinertia="0.00304 0.00424 0.00284 0 0 0.00014"/>
+
+          <geom name="LHY_visual"
+                type="mesh"
+                mesh="LHY_mesh"
+                class="visualgeom"
+                material="hip_visual"/>
+
+          <geom name="LHY_collision"
+                type="mesh"
+                mesh="LHY_mesh"
+                class="contactgeom"
+                rgba="0.55 0.65 0.85 0.18"/>
+
+
+          <body name="LHP"
+                pos="0 0.00525 -0.072166"
+                quat="1 0 0 0">
+
+            <joint name="LHP_J"
+                   type="hinge"
+                   pos="0 0 0"
+                   axis="0 -1 0"
+                   limited="true"
+                   range="-2.1 2.5"/>
+
+            <inertial pos="-0.0064888 0.059796 -0.028598"
+                      mass="2.8946"
+                      fullinertia="0.01758 0.01851 0.00554 -0.00059 0.00191 -0.00274"/>
+
+            <geom name="LHP_visual"
+                  type="mesh"
+                  mesh="LHP_mesh"
+                  class="visualgeom"
+                  material="leg_visual"/>
+
+            <geom name="LHP_collision"
+                  type="mesh"
+                  mesh="LHP_mesh"
+                  class="contactgeom"
+                  rgba="0.22 0.68 0.30 0.18"/>
+
+
+            <body name="LKP"
+                  pos="0 0.093 -0.25"
+                  quat="1 0 0 0">
+
+              <joint name="LKP_J"
+                     type="hinge"
+                     pos="0 0 0"
+                     axis="0 -1 0"
+                     limited="true"
+                     range="0.3 2.55"/>
+
+              <inertial pos="-1.0338E-06 0.00029848 -0.21576"
+                        mass="2.5103"
+                        fullinertia="0.01732 0.01858 0.00294 0 0 -9E-05"/>
+
+              <geom name="LKP_visual"
+                    type="mesh"
+                    mesh="LKP_mesh"
+                    class="visualgeom"
+                    material="leg_visual"/>
+
+              <geom name="LKP_collision"
+                    type="mesh"
+                    mesh="LKP_mesh"
+                    class="contactgeom"
+                    rgba="0.22 0.68 0.30 0.18"/>
+
+
+              <body name="LWP"
+                    pos="0 0.0899 -0.25"
+                    quat="1 0 0 0">
+
+                <joint name="LWP_J"
+                       type="hinge"
+                       pos="0 0 0"
+                       axis="0 -1 0"
+                       limited="false"/>
+
+                <inertial pos="0.00010334 -0.0019666 -0.00013552"
+                          mass="2.3146"
+                          fullinertia="0.01445 0.02787 0.01445 0 0 0"/>
+
+                <geom name="LWP_visual"
+                      type="mesh"
+                      mesh="LWP_mesh"
+                      class="visualgeom"
+                      material="wheel_visual"/>
+
+                <geom name="LWP_collision"
+                      type="cylinder"
+                      size="0.145 0.025"
+                      pos="0 -0.001 0"
+                      quat="0.7071067812 0.7071067812 0 0"
+                      class="contactgeom"
+                      material="wheel_visual"
+                      friction="1 0.01 0.001"/>
+
+                <site name="LWP_center_site"
+                      type="sphere"
+                      pos="0 0 0"
+                      size="0.006"
+                      rgba="1 0.2 0.2 1"/>
+
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+
+
+      <!-- ======================================================== -->
+      <!-- Right leg                                                -->
+      <!-- ======================================================== -->
+
+      <body name="RHY_fix"
+            pos="0 0 0"
+            quat="1 0 0 0">
+
+        <inertial pos="-3E-05 -0.12497 -0.15053"
+                  mass="1.9274"
+                  fullinertia="0.00247 0.00246 0.00372 0 0 0"/>
+
+        <geom name="RHY_fix_visual"
+              type="mesh"
+              mesh="RHY_fix_mesh"
+              class="visualgeom"
+              material="hip_visual"/>
+
+        <geom name="RHY_fix_collision"
+              type="mesh"
+              mesh="RHY_fix_mesh"
+              class="contactgeom"
+              rgba="0.55 0.65 0.85 0.18"/>
+
+
+        <body name="RHY"
+              pos="0 -0.125 -0.1864"
+              quat="1 0 0 0">
+
+          <joint name="RHY_J"
+                 type="hinge"
+                 pos="0 0 0"
+                 axis="0 0 1"
+                 limited="true"
+                 range="-1 1"/>
+
+          <inertial pos="-6.6905E-07 0.030776 -0.069742"
+                    mass="2.0648"
+                    fullinertia="0.00304 0.00424 0.00284 0 0 -0.00014"/>
+
+          <geom name="RHY_visual"
+                type="mesh"
+                mesh="RHY_mesh"
+                class="visualgeom"
+                material="hip_visual"/>
+
+          <geom name="RHY_collision"
+                type="mesh"
+                mesh="RHY_mesh"
+                class="contactgeom"
+                rgba="0.55 0.65 0.85 0.18"/>
+
+
+          <body name="RHP"
+                pos="0 -0.00525 -0.072166"
+                quat="1 0 0 0">
+
+            <joint name="RHP_J"
+                   type="hinge"
+                   pos="0 0 0"
+                   axis="0 1 0"
+                   limited="true"
+                   range="-2.5 2.1"/>
+
+            <inertial pos="-0.0064753 -0.059769 -0.028631"
+                      mass="2.8946"
+                      fullinertia="0.01757 0.0185 0.00554 0.0006 0.00191 0.00273"/>
+
+            <geom name="RHP_visual"
+                  type="mesh"
+                  mesh="RHP_mesh"
+                  class="visualgeom"
+                  material="leg_visual"/>
+
+            <geom name="RHP_collision"
+                  type="mesh"
+                  mesh="RHP_mesh"
+                  class="contactgeom"
+                  rgba="0.22 0.68 0.30 0.18"/>
+
+
+            <body name="RKP"
+                  pos="0 -0.092 -0.25"
+                  quat="1 0 0 0">
+
+              <joint name="RKP_J"
+                     type="hinge"
+                     pos="0 0 0"
+                     axis="0 1 0"
+                     limited="true"
+                     range="-2.55 -0.3"/>
+
+              <inertial pos="2.9649E-05 -0.00029849 -0.21579"
+                        mass="2.5103"
+                        fullinertia="0.01733 0.01858 0.00294 0 0 9E-05"/>
+
+              <geom name="RKP_visual"
+                    type="mesh"
+                    mesh="RKP_mesh"
+                    class="visualgeom"
+                    material="leg_visual"/>
+
+              <geom name="RKP_collision"
+                    type="mesh"
+                    mesh="RKP_mesh"
+                    class="contactgeom"
+                    rgba="0.22 0.68 0.30 0.18"/>
+
+
+              <body name="RWP"
+                    pos="0 -0.0899 -0.25"
+                    quat="1 0 0 0">
+
+                <joint name="RWP_J"
+                       type="hinge"
+                       pos="0 0 0"
+                       axis="0 1 0"
+                       limited="false"/>
+
+                <inertial pos="0.00015726 0.0019666 6.5696E-05"
+                          mass="2.3146"
+                          fullinertia="0.01445 0.02787 0.01445 0 0 0"/>
+
+                <geom name="RWP_visual"
+                      type="mesh"
+                      mesh="RWP_mesh"
+                      class="visualgeom"
+                      material="wheel_visual"/>
+
+                <geom name="RWP_collision"
+                      type="cylinder"
+                      size="0.145 0.025"
+                      pos="0 0.001 0"
+                      quat="0.7071067812 0.7071067812 0 0"
+                      class="contactgeom"
+                      material="wheel_visual"
+                      friction="1 0.01 0.001"/>
+
+                <site name="RWP_center_site"
+                      type="sphere"
+                      pos="0 0 0"
+                      size="0.006"
+                      rgba="0.2 0.2 1 1"/>
+
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+
+    </body>
+
+  </worldbody>
+
+
+  <!-- ============================================================ -->
+  <!-- Contact exclusions                                            -->
+  <!-- ============================================================ -->
+
+  <contact>
+
+    <exclude body1="base_link"
+             body2="LHY_fix"/>
+
+    <exclude body1="base_link"
+             body2="RHY_fix"/>
+
+    <exclude body1="LHY_fix"
+             body2="LHY"/>
+
+    <exclude body1="RHY_fix"
+             body2="RHY"/>
+
+  </contact>
+
+
+  <!-- ============================================================ -->
+  <!-- Actuator order                                                -->
+  <!-- LHY LHP LKP LWP RHY RHP RKP RWP                              -->
+  <!-- ============================================================ -->
+
+  <actuator>
+
+    <motor name="LHY_J"
+           joint="LHY_J"
+           gear="1"/>
+
+    <motor name="LHP_J"
+           joint="LHP_J"
+           gear="1"/>
+
+    <motor name="LKP_J"
+           joint="LKP_J"
+           gear="1"/>
+
+    <motor name="LWP_J"
+           joint="LWP_J"
+           gear="1"/>
+
+    <motor name="RHY_J"
+           joint="RHY_J"
+           gear="1"/>
+
+    <motor name="RHP_J"
+           joint="RHP_J"
+           gear="1"/>
+
+    <motor name="RKP_J"
+           joint="RKP_J"
+           gear="1"/>
+
+    <motor name="RWP_J"
+           joint="RWP_J"
+           gear="1"/>
+
+  </actuator>
+
+
+  <!-- ============================================================ -->
+  <!-- Sensors                                                       -->
+  <!-- ============================================================ -->
+
+  <sensor>
+
+    <framequat name="orientation"
+               objtype="site"
+               objname="imu"
+               noise="0.001"/>
+
+    <gyro name="angular_velocity"
+          site="imu"
+          noise="0.005"
+          cutoff="34.9"/>
+
+    <accelerometer name="linear_acceleration"
+                   site="imu"
+                   noise="0.01"
+                   cutoff="34.9"/>
+
+
+    <jointpos name="LHY_J_pos"
+              joint="LHY_J"/>
+
+    <jointvel name="LHY_J_vel"
+              joint="LHY_J"/>
+
+    <actuatorfrc name="LHY_J_force"
+                 actuator="LHY_J"
+                 noise="0.001"/>
+
+
+    <jointpos name="LHP_J_pos"
+              joint="LHP_J"/>
+
+    <jointvel name="LHP_J_vel"
+              joint="LHP_J"/>
+
+    <actuatorfrc name="LHP_J_force"
+                 actuator="LHP_J"
+                 noise="0.001"/>
+
+
+    <jointpos name="LKP_J_pos"
+              joint="LKP_J"/>
+
+    <jointvel name="LKP_J_vel"
+              joint="LKP_J"/>
+
+    <actuatorfrc name="LKP_J_force"
+                 actuator="LKP_J"
+                 noise="0.001"/>
+
+
+    <jointpos name="LWP_J_pos"
+              joint="LWP_J"/>
+
+    <jointvel name="LWP_J_vel"
+              joint="LWP_J"/>
+
+    <actuatorfrc name="LWP_J_force"
+                 actuator="LWP_J"
+                 noise="0.001"/>
+
+
+    <jointpos name="RHY_J_pos"
+              joint="RHY_J"/>
+
+    <jointvel name="RHY_J_vel"
+              joint="RHY_J"/>
+
+    <actuatorfrc name="RHY_J_force"
+                 actuator="RHY_J"
+                 noise="0.001"/>
+
+
+    <jointpos name="RHP_J_pos"
+              joint="RHP_J"/>
+
+    <jointvel name="RHP_J_vel"
+              joint="RHP_J"/>
+
+    <actuatorfrc name="RHP_J_force"
+                 actuator="RHP_J"
+                 noise="0.001"/>
+
+
+    <jointpos name="RKP_J_pos"
+              joint="RKP_J"/>
+
+    <jointvel name="RKP_J_vel"
+              joint="RKP_J"/>
+
+    <actuatorfrc name="RKP_J_force"
+                 actuator="RKP_J"
+                 noise="0.001"/>
+
+
+    <jointpos name="RWP_J_pos"
+              joint="RWP_J"/>
+
+    <jointvel name="RWP_J_vel"
+              joint="RWP_J"/>
+
+    <actuatorfrc name="RWP_J_force"
+                 actuator="RWP_J"
+                 noise="0.001"/>
+
+  </sensor>
+
+
+  <!-- ============================================================ -->
+  <!-- Initial pose                                                  -->
+  <!-- ============================================================ -->
+
+  
+
+</mujoco>

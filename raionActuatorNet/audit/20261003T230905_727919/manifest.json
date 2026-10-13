@@ -1,0 +1,166 @@
+{
+  "original": "/home/dongju/Downloads/actuator-net-gym-articulated-main",
+  "source": "/home/dongju/actuator-net-gym-articulated-main",
+  "port": "/home/dongju/mujoco/raionActuatorNet",
+  "files": [
+    {
+      "area": "source",
+      "path": "README.md",
+      "original_sha256": "96a6fb1079650f7f362557c3a0b704db347c32a187ef3f401dadb34ca5e39019",
+      "current_sha256": "387826baa057fa67328f5fd8ba3d40a9050ecc85df1283edf1f3882834c14443",
+      "status": "modified"
+    },
+    {
+      "area": "port",
+      "path": "README.md",
+      "original_sha256": "96a6fb1079650f7f362557c3a0b704db347c32a187ef3f401dadb34ca5e39019",
+      "current_sha256": "79ec4231967133e860c17a2f73f32f18852c9e307ad20f4d32cd4dbf2f427247",
+      "status": "modified"
+    },
+    {
+      "area": "reference",
+      "path": "README.md",
+      "original_sha256": "96a6fb1079650f7f362557c3a0b704db347c32a187ef3f401dadb34ca5e39019",
+      "current_sha256": "96a6fb1079650f7f362557c3a0b704db347c32a187ef3f401dadb34ca5e39019",
+      "status": "unchanged"
+    },
+    {
+      "area": "source",
+      "path": "CMakeLists.txt",
+      "original_sha256": "5a62e0280dc9c4d3c4f30c879c915c0291213a4979a4b611b7aa579e72f110eb",
+      "current_sha256": "f95bf6beac6814f87086a3875ff858002ab4b5432793e6cd7cb0ccd7210992e9",
+      "status": "modified"
+    },
+    {
+      "area": "port",
+      "path": "CMakeLists.txt",
+      "original_sha256": "5a62e0280dc9c4d3c4f30c879c915c0291213a4979a4b611b7aa579e72f110eb",
+      "current_sha256": null,
+      "status": "missing"
+    },
+    {
+      "area": "reference",
+      "path": "CMakeLists.txt",
+      "original_sha256": "5a62e0280dc9c4d3c4f30c879c915c0291213a4979a4b611b7aa579e72f110eb",
+      "current_sha256": "5a62e0280dc9c4d3c4f30c879c915c0291213a4979a4b611b7aa579e72f110eb",
+      "status": "unchanged"
+    },
+    {
+      "area": "source",
+      "path": "src/augmented_sim.cpp",
+      "original_sha256": "cbe750a7c8ac6dc4015501530d18926aada1cd716a62dcda51267ae185cf2ad7",
+      "current_sha256": "a50bd30a8e90df4dcc4fdea9c748a64b2dbffa5dca9ea784391397c639d0925d",
+      "status": "modified"
+    },
+    {
+      "area": "port",
+      "path": "src/augmented_sim.cpp",
+      "original_sha256": "cbe750a7c8ac6dc4015501530d18926aada1cd716a62dcda51267ae185cf2ad7",
+      "current_sha256": null,
+      "status": "missing"
+    },
+    {
+      "area": "reference",
+      "path": "src/augmented_sim.cpp",
+      "original_sha256": "cbe750a7c8ac6dc4015501530d18926aada1cd716a62dcda51267ae185cf2ad7",
+      "current_sha256": "cbe750a7c8ac6dc4015501530d18926aada1cd716a62dcda51267ae185cf2ad7",
+      "status": "unchanged"
+    },
+    {
+      "area": "source",
+      "path": "scripts/common.py",
+      "original_sha256": "42df3292529ee56e74855ae7ddb20bbe33ffdb1bb8bc6154ca0a26a9c91f0a7f",
+      "current_sha256": "73ae0896e076b8c6cb0870e0054e7a2cc48eefb3a9a92c5dd89526d371e40966",
+      "status": "modified"
+    },
+    {
+      "area": "port",
+      "path": "scripts/common.py",
+      "original_sha256": "42df3292529ee56e74855ae7ddb20bbe33ffdb1bb8bc6154ca0a26a9c91f0a7f",
+      "current_sha256": "53180b66fcf4ef58716ca17052e8a14f8fd01cdbad4a11020c67a41be4f965a6",
+      "status": "modified"
+    },
+    {
+      "area": "reference",
+      "path": "scripts/common.py",
+      "original_sha256": "42df3292529ee56e74855ae7ddb20bbe33ffdb1bb8bc6154ca0a26a9c91f0a7f",
+      "current_sha256": "42df3292529ee56e74855ae7ddb20bbe33ffdb1bb8bc6154ca0a26a9c91f0a7f",
+      "status": "unchanged"
+    },
+    {
+      "area": "source",
+      "path": "scripts/train.py",
+      "original_sha256": "191405b0d438e2075143eb31de926f098ed8063b5ffc98465aa419a6ae171b9a",
+      "current_sha256": "61f89b49f0c8c5d82cc20c6ceb360ea28b5e334c736a546da0ef317396c56f62",
+      "status": "modified"
+    },
+    {
+      "area": "port",
+      "path": "scripts/train.py",
+      "original_sha256": "191405b0d438e2075143eb31de926f098ed8063b5ffc98465aa419a6ae171b9a",
+      "current_sha256": "5ef1f58eeffba47e2d995789e8463c57efc175ec4707bec13b693b732f18846a",
+      "status": "modified"
+    },
+    {
+      "area": "reference",
+      "path": "scripts/train.py",
+      "original_sha256": "191405b0d438e2075143eb31de926f098ed8063b5ffc98465aa419a6ae171b9a",
+      "current_sha256": "191405b0d438e2075143eb31de926f098ed8063b5ffc98465aa419a6ae171b9a",
+      "status": "unchanged"
+    },
+    {
+      "area": "source",
+      "path": "scripts/evaluate.py",
+      "original_sha256": "6813d5b782936a1f9e217cab81be869050240ad6411d7563060f58ba354d5db7",
+      "current_sha256": "6813d5b782936a1f9e217cab81be869050240ad6411d7563060f58ba354d5db7",
+      "status": "unchanged"
+    },
+    {
+      "area": "port",
+      "path": "scripts/evaluate.py",
+      "original_sha256": "6813d5b782936a1f9e217cab81be869050240ad6411d7563060f58ba354d5db7",
+      "current_sha256": "f22ecd3ecf21bdb2bff27de5d75c2aaca020be6565775ac130394b504ee7f029",
+      "status": "modified"
+    },
+    {
+      "area": "reference",
+      "path": "scripts/evaluate.py",
+      "original_sha256": "6813d5b782936a1f9e217cab81be869050240ad6411d7563060f58ba354d5db7",
+      "current_sha256": "6813d5b782936a1f9e217cab81be869050240ad6411d7563060f58ba354d5db7",
+      "status": "unchanged"
+    },
+    {
+      "area": "source",
+      "path": "scripts/pt_to_jit.py",
+      "original_sha256": "b95dfcb3d26ef36dc2be017790026c68fe42d14dc2dfd650062e5939dfb87e84",
+      "current_sha256": "b95dfcb3d26ef36dc2be017790026c68fe42d14dc2dfd650062e5939dfb87e84",
+      "status": "unchanged"
+    },
+    {
+      "area": "port",
+      "path": "scripts/pt_to_jit.py",
+      "original_sha256": "b95dfcb3d26ef36dc2be017790026c68fe42d14dc2dfd650062e5939dfb87e84",
+      "current_sha256": "b95dfcb3d26ef36dc2be017790026c68fe42d14dc2dfd650062e5939dfb87e84",
+      "status": "unchanged"
+    },
+    {
+      "area": "reference",
+      "path": "scripts/pt_to_jit.py",
+      "original_sha256": "b95dfcb3d26ef36dc2be017790026c68fe42d14dc2dfd650062e5939dfb87e84",
+      "current_sha256": "b95dfcb3d26ef36dc2be017790026c68fe42d14dc2dfd650062e5939dfb87e84",
+      "status": "unchanged"
+    }
+  ],
+  "port_inventory": {
+    "scripts/audit_changes.py": "64e708676543519a2fd12ded0d810a7dc72145c3a50dfe1c2dea6cbef83c4df0",
+    "scripts/collect.py": "b0532ee44c02420e76a0476ba691f634db5e833c98bfa9d2bdf38f797b4bca1f",
+    "scripts/live_viewer.py": "ffb52b10c2322f292f47e853e6fc85d9a6e2f4d41304741fc670c149e9615291",
+    "scripts/common.py": "53180b66fcf4ef58716ca17052e8a14f8fd01cdbad4a11020c67a41be4f965a6",
+    "scripts/train.py": "5ef1f58eeffba47e2d995789e8463c57efc175ec4707bec13b693b732f18846a",
+    "scripts/mujoco_sim.py": "c94ad12abe94f6efdb34acb207b7f7b412e33e6738a1d222da529ddb8e98691b",
+    "scripts/pt_to_jit.py": "b95dfcb3d26ef36dc2be017790026c68fe42d14dc2dfd650062e5939dfb87e84",
+    "scripts/evaluate.py": "f22ecd3ecf21bdb2bff27de5d75c2aaca020be6565775ac130394b504ee7f029",
+    "tests/pendulum.xml": "0991b5b8b079ab542085f4a6edc5b9c531e3a6fde8793fe9b8fc2f8d3e3c2764",
+    "tests/test_backend.py": "0cca49b76b74d3aa517336d2bb616b9dbc11eefac480952b21fc74206482bb5e"
+  }
+}

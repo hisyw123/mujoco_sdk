@@ -1,0 +1,33 @@
+# Larger suspended-body exercise for all 28 independently actuated
+# robot joints. L_gripper_J follows R_gripper_J via mimic.
+# amplitude is the signed excursion from nominal, not a +/- sine amplitude.
+initial_keyframe: nominal
+joints:
+  - {motor: arm1_J, amplitude: 0.350, period: 3.0}
+  - {motor: arm2_J, amplitude: -0.450, period: 3.0}
+  - {motor: arm3_J, amplitude: -0.450, period: 3.0}
+  - {motor: arm4_J, amplitude: -0.350, period: 3.0}
+  - {motor: arm5_J, amplitude: 0.350, period: 3.0}
+  - {motor: arm6_J, amplitude: -0.450, period: 3.0}
+  - {motor: CAM_J, amplitude: 0.0, period: 1.0}
+  - {motor: R_gripper_J, amplitude: 0.030, period: 2.0}
+  - {motor: LSY_J, amplitude: 0.300, period: 3.0}
+  - {motor: LSP_J, amplitude: 0.450, period: 3.0}
+  - {motor: LEP_J, amplitude: -0.600, period: 3.0}
+  - {motor: LWP_J, amplitude: 1.200, period: 2.5}
+  - {motor: RSY_J, amplitude: -0.300, period: 3.0}
+  - {motor: RSP_J, amplitude: -0.450, period: 3.0}
+  - {motor: REP_J, amplitude: 0.600, period: 3.0}
+  - {motor: RWP_J, amplitude: -1.200, period: 2.5}
+  - {motor: LHP_J, amplitude: 0.350, period: 2.5}
+  - {motor: LHR_J, amplitude: 0.250, period: 2.5}
+  - {motor: LHY_J, amplitude: 0.300, period: 2.5}
+  - {motor: LKP_J, amplitude: 0.600, period: 2.5}
+  - {motor: LAP_J, amplitude: -0.300, period: 2.5}
+  - {motor: LAR_J, amplitude: 0.200, period: 2.5}
+  - {motor: RHP_J, amplitude: -0.350, period: 2.5}
+  - {motor: RHR_J, amplitude: -0.250, period: 2.5}
+  - {motor: RHY_J, amplitude: -0.300, period: 2.5}
+  - {motor: RKP_J, amplitude: -0.600, period: 2.5}
+  - {motor: RAP_J, amplitude: 0.300, period: 2.5}
+  - {motor: RAR_J, amplitude: -0.200, period: 2.5}

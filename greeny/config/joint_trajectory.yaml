@@ -1,0 +1,6 @@
+# Angles in radians, periods in seconds. One-sided excursion from the XML
+# initial angle and back, starting with zero target velocity.
+# Names refer to logical motors in the selected motor contract.
+joints:
+  - {motor: LHY_J, amplitude: 0.15, period: 4.0}
+  - {motor: RHY_J, amplitude: -0.15, period: 4.0}

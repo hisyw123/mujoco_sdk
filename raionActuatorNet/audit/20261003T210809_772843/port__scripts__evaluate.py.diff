@@ -1,0 +1,78 @@
+--- /home/dongju/Downloads/actuator-net-gym-articulated-main/scripts/evaluate.py
++++ /home/dongju/mujoco/raionActuatorNet/scripts/evaluate.py
+@@ -3,7 +3,7 @@
+ 
+ Runs `augmented_sim` on the cleaned log four ways: free rollout and one-step replay, each with and
+ without the net. Writes per-joint error-vs-time plots, a running-RMSE plot and metrics.json. The
+-oracle row shows what the recorded torque error achieves, which is the ceiling for any predictor.
++oracle row reuses approximate recorded residuals; it is NOT a guaranteed performance ceiling.
+ 
+   python scripts/evaluate.py log.csv --model out/train/run0 --out out/eval/run0 --urdf robot.urdf
+ """
+@@ -20,7 +20,7 @@
+ import matplotlib.pyplot as plt  # noqa: E402
+ 
+ from common import (add_sim_args, block_mask, build_features, cols, joint_names, load_csv,  # noqa: E402
+-                    n_joints, prediction_rate, run_sim, sim_opts)
++                    n_joints, prediction_rate, run_sim, sim_opts, simulator_contract, check_log_metadata)
+ 
+ 
+ def rmse(a, axis=None):
+@@ -61,13 +61,19 @@
+     add_sim_args(ap)
+     args = ap.parse_args()
+     out = pathlib.Path(args.out)
++    if out.exists() and any(out.iterdir()):
++        raise ValueError('output directory is not empty; choose a new run')
+     out.mkdir(parents=True, exist_ok=True)
+     model = pathlib.Path(args.model)
+     jit = model / "actuator_net_jit.pt" if model.is_dir() else model
+     opts = sim_opts(args)
++    contract = simulator_contract(opts)
++    check_log_metadata(args.log, contract)
+     val_block = 0.3
+     if model.is_dir():
+         trained = json.load(open(model / "config.json"))
++        if trained.get('simulator') != contract:
++            raise ValueError('model/backend/joint mapping/PD gains differ from training or provenance missing; retrain')
+         for k in ("stride", "smooth", "steps"):
+             if trained.get(k, 0) != getattr(args, k):
+                 raise SystemExit(f"--{k} is {getattr(args, k)} but the model was trained with "
+@@ -75,7 +81,7 @@
+         val_block = trained.get("val_block", val_block)   # so the held-out split matches training
+ 
+     log = load_csv(args.log, smooth_n=args.smooth)
+-    names = joint_names(args.urdf, n_joints(log))
++    names = joint_names(args.urdf, n_joints(log), args.joint_config)
+     clean = out / "log_clean.csv"
+     log.to_csv(clean, index=False)
+ 
+@@ -110,7 +116,7 @@
+     err = {k: (df["elapsedTime"].to_numpy(),
+                df[cols(df, "sim_gc")].to_numpy() - df[cols(df, "gc")].to_numpy(),
+                df[cols(df, "sim_gv")].to_numpy() - df[cols(df, "gv")].to_numpy()) for k, df in roll.items()}
+-    metrics = {"rollout": {k: dict(pos_rmse_rad=float(rmse(e[1])), vel_rmse_rad_s=float(rmse(e[2])),
++    metrics = {"simulator": contract, "rollout": {k: dict(pos_rmse_rad=float(rmse(e[1])), vel_rmse_rad_s=float(rmse(e[2])),
+                                    pos_rmse_per_joint_rad=rmse(e[1], 0).tolist()) for k, e in err.items()},
+                "one_step": {k: dict(pos_rmse_rad=float(rmse(df[cols(df, "err_gc")])),
+                                     vel_rmse_rad_s=float(rmse(df[cols(df, "err_gv")])),
+@@ -135,7 +141,7 @@
+             for r in raw:                       # one step at a time, carrying state, as the C++ does
+                 y, h = net(torch.tensor(r).view(1, -1), h)
+                 pred.append(y.numpy()[0])
+-        metrics["cpp_vs_python_ff_max_abs_diff_nm"] = float(
++        metrics["backend_vs_python_ff_max_abs_diff_nm"] = float(
+             np.abs(np.stack(pred) - step["augmented"][cols(step["augmented"], "ff")].to_numpy()).max())
+     json.dump(metrics, open(out / "metrics.json", "w"), indent=1)
+ 
+@@ -143,8 +149,8 @@
+     rows += [(f"one-step {k}", v["pos_rmse_rad"], v["vel_rmse_rad_s"]) for k, v in metrics["one_step"].items()]
+     print(pd.DataFrame(rows, columns=["", "pos RMSE [rad]", "vel RMSE [rad/s]"]).to_string(index=False))
+     print("improvement:", {k: f"{v:.1%}" for k, v in metrics["improvement"].items()})
+-    if "cpp_vs_python_ff_max_abs_diff_nm" in metrics:
+-        print("C++ vs Python feature pipeline max |diff|:", metrics["cpp_vs_python_ff_max_abs_diff_nm"], "Nm")
++    if "backend_vs_python_ff_max_abs_diff_nm" in metrics:
++        print("MuJoCo backend vs Python feature pipeline max |diff|:", metrics["backend_vs_python_ff_max_abs_diff_nm"], "Nm")
+ 
+     plot_series({k: (e[0], e[1]) for k, e in err.items()}, names,
+                 "rollout position error, sim - measured [rad]", out / "position_error.png")

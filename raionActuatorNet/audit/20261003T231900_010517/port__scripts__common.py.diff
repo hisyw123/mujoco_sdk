@@ -1,0 +1,99 @@
+--- /home/dongju/Downloads/actuator-net-gym-articulated-main/scripts/common.py
++++ /home/dongju/mujoco/raionActuatorNet/scripts/common.py
+@@ -5,16 +5,46 @@
+ """
+ import pathlib
+ import subprocess
++import sys
++import hashlib
++import json
+ import xml.etree.ElementTree as ET
+ 
+ import numpy as np
+ import pandas as pd
+ 
+ ROOT = pathlib.Path(__file__).resolve().parents[1]
+-BIN = ROOT / "build" / "augmented_sim"
++BIN = ROOT / "scripts" / "mujoco_sim.py"
+ FEATURES = {"pos_err": 0, "vel": 1, "torque": 2}  # codes shared with the Feature enum in the C++
+-SIM_OPTS = ("urdf", "kp", "kd", "stride", "steps")
++SIM_OPTS = ("urdf", "kp", "kd", "stride", "steps", "joint_config")
+ MOVABLE = ("revolute", "continuous", "prismatic")
++
++
++def simulator_contract(opts):
++    """Record the actual compiled model, CSV joint mapping, and gains, not just a path."""
++    import mujoco
++    from mujoco_sim import Sim
++    s = Sim(opts['urdf'], 100. if opts.get('kp') is None else opts['kp'],
++            1. if opts.get('kd') is None else opts['kd'], opts.get('joint_config'))
++    buf = np.empty(mujoco.mj_sizeModel(s.m), dtype=np.uint8)
++    mujoco.mj_saveModel(s.m, None, buf)
++    return dict(backend='mujoco_python_explicit_pd_v1', mujoco=mujoco.__version__,
++                compiled_model_sha256=hashlib.sha256(buf.tobytes()).hexdigest(),
++                joint_names=s.names, kp=s.kp.tolist(), kd=s.kd.tolist(),
++                integrator='Euler', contacts=False, native_actuators=False)
++
++
++def check_log_metadata(path, contract):
++    meta_path = pathlib.Path(path).with_suffix('.meta.json')
++    if not meta_path.exists():
++        print(f'NOTE: {path}: no collection metadata; verify CSV order and gains manually')
++        return
++    meta = json.loads(meta_path.read_text())
++    for key in ('joint_names', 'kp', 'kd'):
++        if meta[key] != contract[key]:
++            raise ValueError(f'{path}: collection {key} differs from replay settings')
++    if meta['csv_sha256'] != hashlib.sha256(pathlib.Path(path).read_bytes()).hexdigest():
++        raise ValueError(f'{path}: CSV changed after collection')
+ 
+ 
+ def cols(df, prefix):
+@@ -27,16 +57,13 @@
+     return len(cols(df, "gc"))
+ 
+ 
+-def joint_names(urdf, n):
++def joint_names(urdf, n, joint_config=None):
+     """Movable joints in URDF order, which is the order raisim uses. Falls back to indices."""
+-    try:
+-        names = [j.get("name") for j in ET.parse(urdf).getroot().findall("joint")
+-                 if j.get("type") in MOVABLE]
+-        if len(names) == n:
+-            return names
+-    except Exception:
+-        pass
+-    return [f"joint_{j}" for j in range(n)]
++    from mujoco_sim import Sim
++    sim = Sim(urdf, joint_config=joint_config)
++    if sim.n != n:
++        raise ValueError('model and CSV disagree on joint count')
++    return sim.names
+ 
+ 
+ def smooth(x, n):
+@@ -89,6 +116,7 @@
+ 
+ 
+ def add_sim_args(parser):
++    parser.add_argument('--joint-config', help='JSON joints list in CSV order, with name/kp/kd')
+     parser.add_argument("--urdf", required=True,
+                         help="robot URDF; its movable joint count must match the log's")
+     parser.add_argument("--kp", type=float, help="PD position gain used during collection")
+@@ -123,14 +151,14 @@
+     """Run `augmented_sim <mode>`; opts map to flags (kp=100 -> --kp 100, steps=1 -> --steps 1)."""
+     if not BIN.exists():
+         raise FileNotFoundError(f"{BIN} not built; see README")
+-    cmd = [str(BIN), mode, str(in_csv), str(out_csv)]
++    cmd = [sys.executable, str(BIN), mode, str(in_csv), str(out_csv)]
+     if model:
+         cmd += ["--model", str(model)]
+     for k, v in opts.items():
+         flag = "--" + k.replace("_", "-")
+         if v is True:
+             cmd.append(flag)
+-        elif v not in (None, False):
++        elif v is not None and v is not False:
+             cmd += [flag, str(v)]
+     subprocess.run(cmd, check=True)
+     return pd.read_csv(out_csv)

@@ -1,0 +1,472 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mujoco model="RoughTerrain-3_bipedal">
+  <compiler angle="radian" inertiafromgeom="false" balanceinertia="true" meshdir="." />
+  <statistic center="0 0 0.35" extent="1.2" meansize="0.1" />
+  <size njmax="1000" nconmax="300" />
+  <option timestep="0.0005" gravity="0 0 -9.81" integrator="implicitfast" solver="Newton" iterations="150" tolerance="1e-10">
+    <flag contact="enable" gravity="enable" nativeccd="disable" island="disable" />
+  </option>
+  <default>
+    <joint damping="0.0" armature="0.02" frictionloss="0.1" />
+    <motor ctrllimited="true" ctrlrange="-90.8 90.8" />
+    <default class="visualgeom">
+      <geom contype="0" conaffinity="0" group="1" density="0" material="robot_visual" />
+    </default>
+    <default class="contactgeom">
+      <geom contype="1" conaffinity="1" group="3" condim="3" friction="1.0 0.01 0.001" solref="0.001 1" solimp="0.99 0.999 0.0005" />
+    </default>
+  </default>
+  <visual>
+    <global azimuth="135" elevation="-20" fovy="42" />
+    <headlight ambient="0.20 0.20 0.20" diffuse="0.30 0.30 0.30" specular="0.02 0.02 0.02" />
+    <quality shadowsize="4096" offsamples="4" />
+    <map force="0.001" />
+    <rgba haze="0.22 0.26 0.32 1" com="0.502 1.0 0 0.5" contactpoint="1.0 1.0 0.6 0.5" contactforce="0.2 0.98 0.2 0.8" />
+    <scale com="0.15" selectpoint="0.15" forcewidth="0.025" contactwidth="0.08" contactheight="0.03" jointlength="0.5" jointwidth="0.03" framelength="0.4" framewidth="0.02" />
+  </visual>
+  <asset>
+    <texture name="skybox" type="skybox" builtin="gradient" rgb1="0.55 0.68 0.82" rgb2="0.22 0.26 0.32" width="512" height="3072" />
+    <texture name="ground_tex" type="2d" builtin="checker" rgb1="0.32 0.35 0.40" rgb2="0.72 0.75 0.80" mark="edge" markrgb="0.90 0.90 0.90" width="512" height="512" />
+    <material name="ground_mat" texture="ground_tex" texrepeat="8 8" texuniform="true" reflectance="0.08" specular="0.10" shininess="0.15" />
+    <material name="robot_visual" rgba="0.72 0.78 0.86 1" specular="0.1" shininess="0.2" reflectance="0.12" />
+    <material name="hip_visual" rgba="0.72 0.82 0.98 1" specular="0.40" shininess="0.60" reflectance="0.10" />
+    <material name="leg_visual" rgba="0.28 0.82 0.40 1" specular="0.35" shininess="0.55" reflectance="0.08" />
+    <material name="wheel_visual" rgba="0.035 0.035 0.040 1" specular="0.28" shininess="0.35" reflectance="0.04" />
+    <material name="base_visual_material" rgba="0.42 0.48 0.58 1" specular="0.40" shininess="0.55" reflectance="0.10" />
+    <material name="asphalt_mat" rgba="0.08 0.08 0.085 1" specular="0.05" shininess="0.05" reflectance="0.02" />
+    <!-- OBJ keeps the source geometry while avoiding the STL decoder's
+         200,000-triangle input limit. -->
+    <mesh name="base_link_visual_mesh" file="meshes/base_link.obj" />
+    <mesh name="camera_link_visual_mesh" file="meshes/camera_link.STL" />
+    <mesh name="arm1_link_visual_mesh" file="meshes/arm1_link.STL" />
+    <mesh name="arm2_link_visual_mesh" file="meshes/arm2_link.STL" />
+    <mesh name="arm3_link_visual_mesh" file="meshes/arm3_link.STL" />
+    <mesh name="arm4_link_visual_mesh" file="meshes/arm4_link.STL" />
+    <mesh name="arm5_link_visual_mesh" file="meshes/arm5_link.STL" />
+    <mesh name="arm6_link_visual_mesh" file="meshes/arm6_link.STL" />
+    <mesh name="L_gripper_link_visual_mesh" file="meshes/L_gripper_link.STL" />
+    <mesh name="R_gripper_link_visual_mesh" file="meshes/R_gripper_link.STL" />
+    <mesh name="LSY_link_visual_mesh" file="meshes/LSY_link.STL" />
+    <mesh name="LSP_link_visual_mesh" file="meshes/LSP_link.STL" />
+    <mesh name="LEP_link_visual_mesh" file="meshes/LEP_link.STL" />
+    <mesh name="LWP_link_visual_mesh" file="meshes/LWP_link.STL" />
+    <mesh name="RSY_link_visual_mesh" file="meshes/RSY_link.STL" />
+    <mesh name="RSP_link_visual_mesh" file="meshes/RSP_link.STL" />
+    <mesh name="REP_link_visual_mesh" file="meshes/REP_link.STL" />
+    <mesh name="RWP_link_visual_mesh" file="meshes/RWP_link.STL" />
+    <mesh name="LHP_link_visual_mesh" file="meshes/LHP_link.STL" />
+    <mesh name="LHR_link_visual_mesh" file="meshes/LHR_link.STL" />
+    <mesh name="LHY_link_visual_mesh" file="meshes/LHY_link.STL" />
+    <mesh name="LKP_link_visual_mesh" file="meshes/LKP_link.STL" />
+    <mesh name="LAP_link_visual_mesh" file="meshes/LAP_link.STL" />
+    <mesh name="LAR_link_visual_mesh" file="meshes/LAR_link.STL" />
+    <mesh name="RHP_link_visual_mesh" file="meshes/RHP_link.STL" />
+    <mesh name="RHR_link_visual_mesh" file="meshes/RHR_link.STL" />
+    <mesh name="RHY_link_visual_mesh" file="meshes/RHY_link.STL" />
+    <mesh name="RKP_link_visual_mesh" file="meshes/RKP_link.STL" />
+    <mesh name="RAP_link_visual_mesh" file="meshes/RAP_link.STL" />
+    <mesh name="RAR_link_visual_mesh" file="meshes/RAR_link.STL" />
+    <mesh name="L_gripper_link_collision_mesh" file="meshes/L_gripper_link.STL" />
+    <mesh name="R_gripper_link_collision_mesh" file="meshes/R_gripper_link.STL" />
+  </asset>
+  <worldbody>
+    <!-- <light name="key_light" directional="true" pos="2.5 -2.5 4.0" dir="-0.45 0.45 -1.0" diffuse="0.55 0.55 0.55" specular="0.08 0.08 0.08" castshadow="false" /> -->
+    <light name="key_light" directional="true" pos="2.5 -2.5 4.0" dir="-0.45 0.45 -1.0" diffuse="0.35 0.35 0.35" specular="0.02 0.02 0.02" castshadow="false" />
+    <light name="fill_light" directional="true" pos="-2.5 2.0 3.0" dir="0.50 -0.40 -0.85" diffuse="0.18 0.20 0.24" specular="0.01 0.01 0.01" castshadow="false" />
+    <light name="front_light" active="false" directional="true" pos="1.5 -3.0 2.0" dir="-0.20 0.80 -0.35" diffuse="0.65 0.68 0.72" specular="0.10 0.10 0.10" castshadow="false" />
+    <light name="rim_light" active="false" directional="true" pos="-2.5 -2.5 3.0" dir="0.55 0.55 -0.75" diffuse="0.55 0.60 0.72" specular="0.14 0.14 0.16" castshadow="false" />
+    <light name="top_soft_light" active="false" directional="true" pos="0 0 5.0" dir="0 0 -1" diffuse="0.55 0.55 0.58" specular="0.10 0.10 0.10" castshadow="false" />
+    <camera name="debug_camera" mode="targetbody" target="base_link" pos="1.55 -1.75 1.15" fovy="38" />
+    <geom name="ground_visual" type="plane" pos="0 0 0" size="1000 1000 0.1" material="ground_mat" contype="0" conaffinity="0" group="0" rgba="0.65 0.68 0.72 1" />
+    <geom name="ground_collision" type="plane" pos="0 0 0" size="1000 1000 0.1" contype="1" conaffinity="1" group="3" condim="3" friction="1.0 0.01 0.001" solref="0.004 1" solimp="0.9 0.95 0.001" rgba="0 0 0 0" />
+    <body name="stairs_pyramid_narrow" pos="5.0 5.0 0">
+      <geom name="narrow_level_1" type="box" pos="0 0 0.06" size="2.00 2.00 0.06" class="contactgeom" group="0" material="ground_mat" />
+      <geom name="narrow_level_2" type="box" pos="0 0 0.12" size="1.75 1.75 0.12" class="contactgeom" group="0" material="ground_mat" />
+      <geom name="narrow_level_3" type="box" pos="0 0 0.18" size="1.50 1.50 0.18" class="contactgeom" group="0" material="ground_mat" />
+      <geom name="narrow_level_4" type="box" pos="0 0 0.24" size="1.25 1.25 0.24" class="contactgeom" group="0" material="ground_mat" />
+    </body>
+    <body name="stairs_pyramid_medium" pos="-5.0 5.0 0">
+      <geom name="medium_level_1" type="box" pos="0 0 0.07" size="2.30 2.30 0.07" class="contactgeom" group="0" material="ground_mat" />
+      <geom name="medium_level_2" type="box" pos="0 0 0.14" size="1.95 1.95 0.14" class="contactgeom" group="0" material="ground_mat" />
+      <geom name="medium_level_3" type="box" pos="0 0 0.21" size="1.60 1.60 0.21" class="contactgeom" group="0" material="ground_mat" />
+      <geom name="medium_level_4" type="box" pos="0 0 0.28" size="1.25 1.25 0.28" class="contactgeom" group="0" material="ground_mat" />
+    </body>
+    <body name="stairs_pyramid_wide" pos="5.0 -5.0 0">
+      <geom name="wide_level_1" type="box" pos="0 0 0.08" size="2.60 2.60 0.08" class="contactgeom" group="0" material="ground_mat" />
+      <geom name="wide_level_2" type="box" pos="0 0 0.16" size="2.15 2.15 0.16" class="contactgeom" group="0" material="ground_mat" />
+      <geom name="wide_level_3" type="box" pos="0 0 0.24" size="1.70 1.70 0.24" class="contactgeom" group="0" material="ground_mat" />
+      <geom name="wide_level_4" type="box" pos="0 0 0.32" size="1.25 1.25 0.32" class="contactgeom" group="0" material="ground_mat" />
+    </body>
+    <body name="stairs_pyramid_very_wide" pos="-5.0 -5.0 0">
+      <geom name="very_wide_level_1" type="box" pos="0 0 0.08" size="2.90 2.90 0.08" class="contactgeom" group="0" material="ground_mat" />
+      <geom name="very_wide_level_2" type="box" pos="0 0 0.16" size="2.35 2.35 0.16" class="contactgeom" group="0" material="ground_mat" />
+      <geom name="very_wide_level_3" type="box" pos="0 0 0.24" size="1.80 1.80 0.24" class="contactgeom" group="0" material="ground_mat" />
+      <geom name="very_wide_level_4" type="box" pos="0 0 0.32" size="1.25 1.25 0.32" class="contactgeom" group="0" material="ground_mat" />
+    </body>
+    <geom name="speed_bump_1" type="cylinder" size="16.25 3.00" pos="15.0 0 -16.15" quat="0.70710678 0.70710678 0 0" class="contactgeom" group="0" friction="1.0 0.01 0.001" rgba="0.95 0.65 0.05 1" />
+    <geom name="speed_bump_2" type="cylinder" size="16.25 3.00" pos="25.0 0 -16.15" quat="0.70710678 0.70710678 0 0" class="contactgeom" group="0" friction="1.0 0.01 0.001" rgba="0.95 0.65 0.05 1" />
+    <geom name="speed_bump_3" type="cylinder" size="16.25 3.00" pos="35.0 0 -16.15" quat="0.70710678 0.70710678 0 0" class="contactgeom" group="0" friction="1.0 0.01 0.001" rgba="0.95 0.65 0.05 1" />
+    <geom name="speed_bump_4" type="cylinder" size="16.25 3.00" pos="45.0 0 -16.15" quat="0.70710678 0.70710678 0 0" class="contactgeom" group="0" friction="1.0 0.01 0.001" rgba="0.95 0.65 0.05 1" />
+    <geom name="speed_bump_5" type="cylinder" size="16.25 3.00" pos="55.0 0 -16.15" quat="0.70710678 0.70710678 0 0" class="contactgeom" group="0" friction="1.0 0.01 0.001" rgba="0.95 0.65 0.05 1" />
+    <body name="base_link" pos="0 0 0.9" quat="1 0 0 0">
+      <freejoint name="root" />
+      <inertial pos="-0.011728 -0.001196 0.006697" mass="17.401768" fullinertia="0.555977 0.439224 0.194049 -0.001306 -0.004346 -0.001545" />
+      <site name="imu" type="sphere" size="0.008" pos="0.06 0 0.05" quat="1 0 0 0" rgba="1 0.1 0.1 1" />
+      <geom name="base_link_visual" type="mesh" pos="0 0 0" quat="1 0 0 0" class="visualgeom" mesh="base_link_visual_mesh" rgba="0.52941 0.52157 0.44314 1" />
+      <geom name="base_link_collision" type="box" pos="0 0 0" quat="1 0 0 0" class="contactgeom" size="0.08 0.15 0.14" rgba="0.35 0.45 0.55 0.12" />
+      <body name="camera_link" pos="0.08975 -0.085 0.15625" quat="1 0 0 0">
+        <joint name="CAM_J" pos="0 0 0" axis="0 1 0" type="hinge" limited="true" range="0 2.356194490192345" />
+        <inertial pos="3.4135e-05 0.083853 0.036365" mass="0.067508" fullinertia="0.000144 1.5e-05 0.000138 1e-06 0 -1e-06" />
+        <geom name="camera_link_visual" type="mesh" pos="0 0 0" quat="1 0 0 0" class="visualgeom" mesh="camera_link_visual_mesh" rgba="0.89412 0.89412 0.89412 1" />
+        <body name="oak_mount_frame" pos="0 0.085 0.035" quat="1.45029954719288e-10 -0.707106781114032 -0.707106781259063 1.45029954749034e-10">
+          <body name="cam_a_mechanical_frame" pos="-1.271e-06 -0.004754419 -0.014900899" quat="1 0 0 0">
+            <body name="cam_a_optical_frame" pos="0 0 0" quat="2.05103328935406e-10 -1 0 0">
+              <!-- Preview FOV; replace with calibrated camera intrinsics when available. -->
+              <body name="cam_a_isaac_opengl_frame" pos="0 0 0" quat="2.05103328935406e-10 -1 0 0">
+                <!-- Roll the preview 180 degrees without changing the viewing direction. -->
+                <camera name="cam_a" mode="fixed" quat="0 0 0 1" fovy="60" />
+              </body>
+              <!-- Optical-to-MuJoCo conversion, followed by the same 180-degree preview roll. -->
+              <body name="cam_b_optical_frame" pos="-0.037352133 -0.000129444 -0.000122525" quat="0.999831208357054 0.00253087713084144 -0.00893881751735214 0.0158507727765645">
+                <camera name="cam_b" mode="fixed" quat="0 0 1 0" fovy="60" />
+              </body>
+              <body name="cam_c_optical_frame" pos="0.037544191 -0.000626141 -0.000495211" quat="0.999926930976431 0.00184475565953558 -0.00338605307486075 0.0114570602331702">
+                <camera name="cam_c" mode="fixed" quat="0 0 1 0" fovy="60" />
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+      <body name="arm1_link" pos="-0.097989 0 0.2085" quat="1 0 0 0">
+        <joint name="arm1_J" pos="0 0 0" axis="-1 0 0" type="hinge" limited="true" range="-0.7857 0.7857" />
+        <inertial pos="-0.062306 -0.033414 -0.00049" mass="1.639843" fullinertia="0.002507 0.002284 0.002743 0.000244 7e-06 -9e-06" />
+        <geom name="arm1_link_visual" type="mesh" pos="0 0 0" quat="1 0 0 0" class="visualgeom" mesh="arm1_link_visual_mesh" rgba="0.89412 0.89412 0.89412 1" />
+        <body name="arm2_link" pos="-0.0655 -0.0339 0" quat="1 0 0 0">
+          <joint name="arm2_J" pos="0 0 0" axis="0 -1 0" type="hinge" limited="true" range="-1.5714 -0.2" />
+          <inertial pos="0.000157 0.053361 -0.265121" mass="2.267423" fullinertia="0.025282 0.023568 0.004163 1e-06 -2.1e-05 -0.005468" />
+          <geom name="arm2_link_visual" type="mesh" pos="0 0 0" quat="1 0 0 0" class="visualgeom" mesh="arm2_link_visual_mesh" rgba="0.14902 0.15294 0.13333 1" />
+          <geom name="arm2_link_collision" type="cylinder" pos="0 0.025 -0.1675" quat="1 0 0 0" class="contactgeom" size="0.04 0.225" rgba="0.35 0.45 0.55 0.12" />
+          <body name="arm3_link" pos="0 0.0678 -0.325" quat="1 0 0 0">
+            <joint name="arm3_J" pos="0 0 0" axis="0 1 0" type="hinge" limited="true" range="-3.14159 -0.0" />
+            <inertial pos="-0.055616 -0.010327 0.096483" mass="0.40255" fullinertia="0.001743 0.002156 0.000757 -0.000119 0.000859 0.000205" />
+            <geom name="arm3_link_visual" type="mesh" pos="0 0 0" quat="1 0 0 0" class="visualgeom" mesh="arm3_link_visual_mesh" rgba="0.99608 0.99608 1 1" />
+            <geom name="arm3_link_collision" type="cylinder" pos="-0.09 -0.025 0.15" quat="0.968912421710645 0 -0.247403959254523 0" class="contactgeom" size="0.02 0.04" rgba="0.35 0.45 0.55 0.12" />
+            <body name="arm4_link" pos="-0.12 0.0081 0.20785" quat="1 0 0 0">
+              <joint name="arm4_J" pos="0 0 0" axis="0 1 0" type="hinge" limited="true" range="-2.64 1.57" />
+              <inertial pos="-0.003193 -0.037711 0.045661" mass="1.077506" fullinertia="0.002655 0.002662 0.000826 1.9e-05 -0.000187 -0.000165" />
+              <geom name="arm4_link_visual" type="mesh" pos="0 0 0" quat="1 0 0 0" class="visualgeom" mesh="arm4_link_visual_mesh" rgba="0.79216 0.81961 0.93333 1" />
+              <geom name="arm4_link_collision" type="cylinder" pos="0 -0.04 0.05" quat="1 0 0 0" class="contactgeom" size="0.045 0.05" rgba="0.35 0.45 0.55 0.12" />
+              <body name="arm5_link" pos="-0.042 -0.042 0.09" quat="1 0 0 0">
+                <joint name="arm5_J" pos="0 0 0" axis="-1 0 0" type="hinge" limited="true" range="-1.57 1.57" />
+                <inertial pos="0.038733 -0.00046 0.105131" mass="0.567209" fullinertia="0.000898 0.000984 0.000302 -2e-06 0.000179 8e-06" />
+                <geom name="arm5_link_visual" type="mesh" pos="0 0 0" quat="1 0 0 0" class="visualgeom" mesh="arm5_link_visual_mesh" rgba="0.99608 0.99608 1 1" />
+                <geom name="arm5_link_collision" type="cylinder" pos="0.0425 0 0.095" quat="1 0 0 0" class="contactgeom" size="0.035 0.04" rgba="0.35 0.45 0.55 0.12" />
+                <body name="arm6_link" pos="0.042 0 0.1519" quat="1 0 0 0">
+                  <joint name="arm6_J" pos="0 0 0" axis="0 0 1" type="hinge" limited="true" range="-3.14159 3.14159" />
+                  <inertial pos="-0.001783 -0.000394 0.073959" mass="0.75721" fullinertia="0.001045 0.001005 0.000725 -5e-06 -3e-05 1.2e-05" />
+                  <geom name="arm6_link_visual" type="mesh" pos="0 0 0" quat="1 0 0 0" class="visualgeom" mesh="arm6_link_visual_mesh" rgba="0.99608 0.99608 1 1" />
+                  <geom name="arm6_link_collision" type="cylinder" pos="0 0 0.05" quat="1 0 0 0" class="contactgeom" size="0.035 0.05" rgba="0.35 0.45 0.55 0.12" />
+                  <body name="L_gripper_link" pos="0 0 0.1231" quat="1 0 0 0">
+                    <joint name="L_gripper_J" pos="0 0 0" axis="0 1 0" type="slide" limited="true" range="0 0.0425" />
+                    <inertial pos="0.00070083 -0.048773 0.020812" mass="0.023991" fullinertia="1e-05 1.3e-05 6e-06 0 0 2e-06" />
+                    <geom name="L_gripper_link_visual" type="mesh" pos="0 0 0" quat="1 0 0 0" class="visualgeom" mesh="L_gripper_link_visual_mesh" rgba="0.99608 0.99608 1 1" />
+                    <geom name="L_gripper_link_collision" type="mesh" pos="0 0 0" quat="1 0 0 0" class="contactgeom" mesh="L_gripper_link_collision_mesh" rgba="0.35 0.45 0.55 0.12" />
+                  </body>
+                  <body name="R_gripper_link" pos="0 0 0.1231" quat="1 0 0 0">
+                    <joint name="R_gripper_J" pos="0 0 0" axis="0 -1 0" type="slide" limited="true" range="0 0.0425" />
+                    <inertial pos="-0.00070083 0.048773 0.020812" mass="0.023991" fullinertia="1e-05 1.3e-05 6e-06 0 0 -2e-06" />
+                    <geom name="R_gripper_link_visual" type="mesh" pos="0 0 0" quat="1 0 0 0" class="visualgeom" mesh="R_gripper_link_visual_mesh" rgba="0.99608 0.99608 1 1" />
+                    <geom name="R_gripper_link_collision" type="mesh" pos="0 0 0" quat="1 0 0 0" class="contactgeom" mesh="R_gripper_link_collision_mesh" rgba="0.35 0.45 0.55 0.12" />
+                  </body>
+                </body>
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+      <body name="LSY_link" pos="0 0.138 0.2234" quat="1 0 0 0">
+        <joint name="LSY_J" pos="0 0 0" axis="0 0 1" type="hinge" limited="true" range="-0.7857 0.7857" />
+        <inertial pos="0.00046 0.01139 0.056457" mass="1.657713" fullinertia="0.001949 0.002297 0.001796 -1.4e-05 0 4.6e-05" />
+        <geom name="LSY_link_visual" type="mesh" pos="0 0 0" quat="1 0 0 0" class="visualgeom" mesh="LSY_link_visual_mesh" rgba="0.18 0.32 0.21 1" />
+        <body name="LSP_link" pos="0 0.012397 0.059" quat="1 0 0 0">
+          <joint name="LSP_J" pos="0 0 0" axis="0 1 0" type="hinge" limited="true" range="-2.618 2.618" />
+          <inertial pos="-0.005496 0.081741 -0.027024" mass="2.8736" fullinertia="0.016532 0.015951 0.005662 -0.000575 0.001477 -0.002905" />
+          <geom name="LSP_link_visual" type="mesh" pos="0 0 0" quat="1 0 0 0" class="visualgeom" mesh="LSP_link_visual_mesh" rgba="0.18 0.32 0.21 1" />
+          <geom name="LSP_link_collision" type="cylinder" pos="0 0.1 0" quat="0.706893318270714 0.707320179681182 0 0" class="contactgeom" size="0.075 0.05" rgba="0.35 0.45 0.55 0.12" />
+          <geom name="LSP_link_collision_2" type="cylinder" pos="-0.025 0.125 -0.175" quat="1 0 0 0" class="contactgeom" size="0.05 0.075" rgba="0.35 0.45 0.55 0.12" />
+          <body name="LEP_link" pos="0 0.1208 -0.25" quat="1 0 0 0">
+            <joint name="LEP_J" pos="0 0 0" axis="0 1 0" type="hinge" limited="true" range="-2.58 -0.32" />
+            <inertial pos="0.000165 0.033417 -0.218979" mass="2.032326" fullinertia="0.013414 0.012751 0.002951 -2e-06 -1.5e-05 -0.002138" />
+            <geom name="LEP_link_visual" type="mesh" pos="0 0 0" quat="1 0 0 0" class="visualgeom" mesh="LEP_link_visual_mesh" rgba="0.18 0.32 0.21 1" />
+            <geom name="LEP_link_collision" type="cylinder" pos="0 0 -0.175" quat="1 0 0 0" class="contactgeom" size="0.05 0.125" rgba="0.35 0.45 0.55 0.12" />
+            <body name="LWP_link" pos="0 0.04615 -0.25" quat="1 0 0 0">
+              <joint name="LWP_J" pos="0 0 0" axis="0 1 0" type="hinge" limited="false" />
+              <inertial pos="-5.9e-05 0.056093 1e-05" mass="2.453" fullinertia="0.029368 0.057872 0.029371 7e-06 -1e-06 -1e-06" />
+              <geom name="LWP_link_visual" type="mesh" pos="0 0 0" quat="1 0 0 0" class="visualgeom" mesh="LWP_link_visual_mesh" rgba="0.05 0.05 0.05 1" />
+              <geom name="LWP_link_collision" type="cylinder" pos="0 0.055 0" quat="0.706893318270714 0.707320179681182 0 0" class="contactgeom" size="0.2075 0.0185" rgba="0.35 0.45 0.55 0.12" />
+              <geom name="LWP_link_collision_2" type="cylinder" pos="0 0.09 0" quat="0.706893318270714 0.707320179681182 0 0" class="contactgeom" size="0.02 0.0125" rgba="0.35 0.45 0.55 0.12" />
+            </body>
+          </body>
+        </body>
+      </body>
+      <body name="RSY_link" pos="0 -0.138 0.2234" quat="1 0 0 0">
+        <joint name="RSY_J" pos="0 0 0" axis="0 0 1" type="hinge" limited="true" range="-0.7857 0.7857" />
+        <inertial pos="-5.7e-05 -0.011437 0.056863" mass="1.648734" fullinertia="0.001926 0.002277 0.001796 -2e-06 5e-06 -3.6e-05" />
+        <geom name="RSY_link_visual" type="mesh" pos="0 0 0" quat="1 0 0 0" class="visualgeom" mesh="RSY_link_visual_mesh" rgba="0.18 0.32 0.21 1" />
+        <body name="RSP_link" pos="0 -0.0124 0.059" quat="1 0 0 0">
+          <joint name="RSP_J" pos="0 0 0" axis="0 -1 0" type="hinge" limited="true" range="-2.618 2.618" />
+          <inertial pos="-0.005763 -0.082215 -0.026527" mass="2.8528" fullinertia="0.016062 0.015497 0.005588 0.000537 0.001457 0.002812" />
+          <geom name="RSP_link_visual" type="mesh" pos="0 0 0" quat="1 0 0 0" class="visualgeom" mesh="RSP_link_visual_mesh" rgba="0.18 0.32 0.21 1" />
+          <geom name="RSP_link_collision" type="cylinder" pos="0 -0.1 0" quat="0.706893318270714 -0.707320179681182 0 0" class="contactgeom" size="0.075 0.05" rgba="0.35 0.45 0.55 0.12" />
+          <geom name="RSP_link_collision_2" type="cylinder" pos="-0.025 -0.125 -0.175" quat="1 0 0 0" class="contactgeom" size="0.05 0.075" rgba="0.35 0.45 0.55 0.12" />
+          <body name="REP_link" pos="0 -0.1213 -0.25" quat="1 0 0 0">
+            <joint name="REP_J" pos="0 0 0" axis="0 -1 0" type="hinge" limited="true" range="0.32 2.58" />
+            <inertial pos="0.000105 -0.033666 -0.219721" mass="2.016712" fullinertia="0.013047 0.012398 0.002916 1e-06 -1e-06 0.002091" />
+            <geom name="REP_link_visual" type="mesh" pos="0 0 0" quat="1 0 0 0" class="visualgeom" mesh="REP_link_visual_mesh" rgba="0.18 0.32 0.21 1" />
+            <geom name="REP_link_collision" type="cylinder" pos="0 0 -0.175" quat="1 0 0 0" class="contactgeom" size="0.05 0.125" rgba="0.35 0.45 0.55 0.12" />
+            <body name="RWP_link" pos="0 -0.04615 -0.25" quat="1 0 0 0">
+              <joint name="RWP_J" pos="0 0 0" axis="0 -1 0" type="hinge" limited="false" />
+              <inertial pos="0 -0.056349 0" mass="2.4395" fullinertia="0.029336 0.057865 0.029336 0 0 0" />
+              <geom name="RWP_link_visual" type="mesh" pos="0 0 0" quat="1 0 0 0" class="visualgeom" mesh="RWP_link_visual_mesh" rgba="0.05 0.05 0.05 1" />
+              <geom name="RWP_link_collision" type="cylinder" pos="0 -0.055 0" quat="0.706893318270714 -0.707320179681182 0 0" class="contactgeom" size="0.2075 0.0185" rgba="0.35 0.45 0.55 0.12" />
+              <geom name="RWP_link_collision_2" type="cylinder" pos="0 -0.09 0" quat="0.706893318270714 -0.707320179681182 0 0" class="contactgeom" size="0.02 0.0125" rgba="0.35 0.45 0.55 0.12" />
+            </body>
+          </body>
+        </body>
+      </body>
+      <body name="LHP_link" pos="0 0.085346 -0.21768" quat="1 0 0 0">
+        <joint name="LHP_J" pos="0 0 0" axis="0 -0.70711 0.70711" type="hinge" limited="true" range="-1.57 1.57" />
+        <inertial pos="0.024634 0.064733 -0.064221" mass="2.2006" fullinertia="0.004266 0.005783 0.005807 0.000485 -0.000482 -0.000822" />
+        <geom name="LHP_link_visual" type="mesh" pos="0 0 0" quat="1 0 0 0" class="visualgeom" mesh="LHP_link_visual_mesh" rgba="0.75294 0.75294 0.75294 1" />
+        <geom name="LHP_link_collision" type="cylinder" pos="0 0.01 -0.01" quat="0.923821768056673 0.382822858336128 0 0" class="contactgeom" size="0.05 0.035" rgba="0.35 0.45 0.55 0.12" />
+        <geom name="LHP_link_collision_2" type="cylinder" pos="-0.0075 0.075 -0.075" quat="0.706893318270714 0 0.707320179681182 0" class="contactgeom" size="0.05 0.0625" rgba="0.35 0.45 0.55 0.12" />
+        <body name="LHR_link" pos="0.0462 0.073433 -0.073433" quat="1 0 0 0">
+          <joint name="LHR_J" pos="0 0 0" axis="1 0 0" type="hinge" limited="true" range="-1.57 1.57" />
+          <inertial pos="-0.051837 0.000452 -0.149362" mass="1.779908" fullinertia="0.005816 0.006475 0.00265 -5e-06 0.00025 -2e-06" />
+          <geom name="LHR_link_visual" type="mesh" pos="0 0 0" quat="1 0 0 0" class="visualgeom" mesh="LHR_link_visual_mesh" rgba="0.86667 0.9098 1 1" />
+          <geom name="LHR_link_collision" type="cylinder" pos="-0.05 0 -0.125" quat="1 0 0 0" class="contactgeom" size="0.05 0.04" rgba="0.35 0.45 0.55 0.12" />
+          <body name="LHY_link" pos="-0.0527 0 -0.17" quat="1 0 0 0">
+            <joint name="LHY_J" pos="0 0 0" axis="0 0 -1" type="hinge" limited="true" range="-3.14159 3.14159" />
+            <inertial pos="-0.00011 0.026347 -0.13651" mass="2.2494" fullinertia="0.007386 0.006703 0.003157 8e-06 1.1e-05 -0.001071" />
+            <geom name="LHY_link_visual" type="mesh" pos="0 0 0" quat="1 0 0 0" class="visualgeom" mesh="LHY_link_visual_mesh" rgba="0.86667 0.9098 1 1" />
+            <geom name="LHY_link_collision" type="cylinder" pos="0 0 -0.105" quat="1 0 0 0" class="contactgeom" size="0.05 0.09" rgba="0.35 0.45 0.55 0.12" />
+            <geom name="LHY_link_collision_2" type="cylinder" pos="0 0.075 -0.15" quat="0.706893318270714 0.707320179681182 0 0" class="contactgeom" size="0.05 0.0125" rgba="0.35 0.45 0.55 0.12" />
+            <body name="LKP_link" pos="0 0.0582 -0.155" quat="1 0 0 0">
+              <joint name="LKP_J" pos="0 0 0" axis="0 1 0" type="hinge" limited="true" range="-1.94 1.94" />
+              <inertial pos="-0.002143 -0.048488 -0.163426" mass="4.156444" fullinertia="0.035688 0.028867 0.013119 -0.000118 0.000849 0.007276" />
+              <geom name="LKP_link_visual" type="mesh" pos="0 0 0" quat="1 0 0 0" class="visualgeom" mesh="LKP_link_visual_mesh" rgba="0.86667 0.9098 1 1" />
+              <geom name="LKP_link_collision" type="cylinder" pos="0 -0.05 -0.18" quat="1 0 0 0" class="contactgeom" size="0.075 0.1125" rgba="0.35 0.45 0.55 0.12" />
+              <body name="LAP_link" pos="0 -0.04825 -0.325" quat="1 0 0 0">
+                <joint name="LAP_J" pos="0 0 0" axis="0 1 0" type="hinge" limited="true" range="-1.24 0.7857" />
+                <inertial pos="0 5.7e-05 0.003102" mass="0.085615" fullinertia="2.6e-05 1.6e-05 3.5e-05 0 0 0" />
+                <geom name="LAP_link_visual" type="mesh" pos="0 0 0" quat="1 0 0 0" class="visualgeom" mesh="LAP_link_visual_mesh" rgba="0.75294 0.75294 0.75294 1" />
+                <body name="LAR_link" pos="0 0 0" quat="1 0 0 0">
+                  <joint name="LAR_J" pos="0 0 0" axis="1 0 0" type="hinge" limited="true" range="-0.7857 0.7857" />
+                  <inertial pos="0.0092072 5e-05 -0.038007" mass="0.44877" fullinertia="0.000307 0.001192 0.001346 0 -3.9e-05 0" />
+                  <geom name="LAR_link_visual" type="mesh" pos="0 0 0" quat="1 0 0 0" class="visualgeom" mesh="LAR_link_visual_mesh" rgba="0.75294 0.75294 0.75294 1" />
+                  <geom name="LAR_link_collision" type="box" pos="0.025 0 -0.0425" quat="1 0 0 0" class="contactgeom" size="0.1 0.05 0.0075" rgba="0.35 0.45 0.55 0.12" />
+                </body>
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+      <body name="RHP_link" pos="0 -0.085346 -0.21768" quat="1 0 0 0">
+        <joint name="RHP_J" pos="0 0 0" axis="0 0.70711 0.70711" type="hinge" limited="true" range="-1.57 1.57" />
+        <inertial pos="0.024649 -0.064106 -0.064591" mass="2.2002" fullinertia="0.004256 0.005802 0.005773 -0.000481 -0.000485 0.000813" />
+        <geom name="RHP_link_visual" type="mesh" pos="0 0 0" quat="1 0 0 0" class="visualgeom" mesh="RHP_link_visual_mesh" rgba="0.75294 0.75294 0.75294 1" />
+        <geom name="RHP_link_collision" type="cylinder" pos="0 -0.01 -0.01" quat="0.923821768056673 -0.382822858336128 0 0" class="contactgeom" size="0.05 0.035" rgba="0.35 0.45 0.55 0.12" />
+        <geom name="RHP_link_collision_2" type="cylinder" pos="-0.0075 -0.075 -0.075" quat="0.706893318270714 0 0.707320179681182 0" class="contactgeom" size="0.05 0.0625" rgba="0.35 0.45 0.55 0.12" />
+        <body name="RHR_link" pos="0.0462 -0.073433 -0.073433" quat="1 0 0 0">
+          <joint name="RHR_J" pos="0 0 0" axis="1 0 0" type="hinge" limited="true" range="-1.57 1.57" />
+          <inertial pos="-0.051563 0.000324 -0.149362" mass="1.779908" fullinertia="0.005823 0.006467 0.002649 -5e-06 0.000249 -1e-06" />
+          <geom name="RHR_link_visual" type="mesh" pos="0 0 0" quat="1 0 0 0" class="visualgeom" mesh="RHR_link_visual_mesh" rgba="0.86667 0.9098 1 1" />
+          <geom name="RHR_link_collision" type="cylinder" pos="-0.05 0 -0.125" quat="1 0 0 0" class="contactgeom" size="0.05 0.04" rgba="0.35 0.45 0.55 0.12" />
+          <body name="RHY_link" pos="-0.0527 0 -0.17" quat="1 0 0 0">
+            <joint name="RHY_J" pos="0 0 0" axis="0 0 -1" type="hinge" limited="true" range="-3.14159 3.14159" />
+            <inertial pos="0.000253 -0.024834 -0.136811" mass="2.3114" fullinertia="0.007594 0.006752 0.003383 1.8e-05 -9e-06 0.001021" />
+            <geom name="RHY_link_visual" type="mesh" pos="0 0 0" quat="1 0 0 0" class="visualgeom" mesh="RHY_link_visual_mesh" rgba="0.86667 0.9098 1 1" />
+            <geom name="RHY_link_collision" type="cylinder" pos="0 0 -0.105" quat="1 0 0 0" class="contactgeom" size="0.05 0.09" rgba="0.35 0.45 0.55 0.12" />
+            <geom name="RHY_link_collision_2" type="cylinder" pos="0 -0.075 -0.15" quat="0.706893318270714 -0.707320179681182 0 0" class="contactgeom" size="0.05 0.0125" rgba="0.35 0.45 0.55 0.12" />
+            <body name="RKP_link" pos="0 -0.0582 -0.155" quat="1 0 0 0">
+              <joint name="RKP_J" pos="0 0 0" axis="0 -1 0" type="hinge" limited="true" range="-1.94 1.94" />
+              <inertial pos="-0.002081 0.047882 -0.167087" mass="4.113354" fullinertia="0.03445 0.027681 0.012986 3.4e-05 0.000983 -0.007698" />
+              <geom name="RKP_link_visual" type="mesh" pos="0 0 0" quat="1 0 0 0" class="visualgeom" mesh="RKP_link_visual_mesh" rgba="0.86667 0.9098 1 1" />
+              <geom name="RKP_link_collision" type="cylinder" pos="0 0.05 -0.18" quat="1 0 0 0" class="contactgeom" size="0.075 0.1125" rgba="0.35 0.45 0.55 0.12" />
+              <body name="RAP_link" pos="0.00036569 0.04825 -0.32485" quat="1 0 0 0">
+                <joint name="RAP_J" pos="0 0 0" axis="0 -1 0" type="hinge" limited="true" range="-0.7857 1.24" />
+                <inertial pos="3.1e-05 -7.3e-05 9.9e-05" mass="0.085615" fullinertia="1.7e-05 1e-05 2.3e-05 0 0 0" />
+                <geom name="RAP_link_visual" type="mesh" pos="0 0 0" quat="1 0 0 0" class="visualgeom" mesh="RAP_link_visual_mesh" rgba="0.75294 0.75294 0.75294 1" />
+                <body name="RAR_link" pos="0 0 0" quat="1 0 0 0">
+                  <joint name="RAR_J" pos="0 0 0" axis="-1 0 0" type="hinge" limited="true" range="-0.7857 0.7857" />
+                  <inertial pos="0.009097 -5e-05 -0.039702" mass="0.44877" fullinertia="0.000307 0.001192 0.001346 0 -3.9e-05 0" />
+                  <geom name="RAR_link_visual" type="mesh" pos="0 0 0" quat="1 0 0 0" class="visualgeom" mesh="RAR_link_visual_mesh" rgba="0.75294 0.75294 0.75294 1" />
+                  <geom name="RAR_link_collision" type="box" pos="0.025 0 -0.0425" quat="1 0 0 0" class="contactgeom" size="0.1 0.05 0.0075" rgba="0.35 0.45 0.55 0.12" />
+                </body>
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+    </body>
+  </worldbody>
+  <equality>
+    <joint name="gripper_mimic" joint1="L_gripper_J" joint2="R_gripper_J" polycoef="0.0 1.0 0 0 0" />
+  </equality>
+  <actuator>
+    <motor name="CAM_J" joint="CAM_J" gear="1" ctrllimited="true" ctrlrange="-100 100" forcelimited="true" forcerange="-100 100" />
+    <motor name="arm1_J" joint="arm1_J" gear="1" ctrllimited="true" ctrlrange="-12.61 12.61" forcelimited="true" forcerange="-12.61 12.61" />
+    <motor name="arm2_J" joint="arm2_J" gear="1" ctrllimited="true" ctrlrange="-83.1 83.1" forcelimited="true" forcerange="-83.1 83.1" />
+    <motor name="arm3_J" joint="arm3_J" gear="1" ctrllimited="true" ctrlrange="-83.1 83.1" forcelimited="true" forcerange="-83.1 83.1" />
+    <motor name="arm4_J" joint="arm4_J" gear="1" ctrllimited="true" ctrlrange="-12.61 12.61" forcelimited="true" forcerange="-12.61 12.61" />
+    <motor name="arm5_J" joint="arm5_J" gear="1" ctrllimited="true" ctrlrange="-12.61 12.61" forcelimited="true" forcerange="-12.61 12.61" />
+    <motor name="arm6_J" joint="arm6_J" gear="1" ctrllimited="true" ctrlrange="-12.61 12.61" forcelimited="true" forcerange="-12.61 12.61" />
+    <motor name="R_gripper_J" joint="R_gripper_J" gear="1" ctrllimited="true" ctrlrange="-100 100" forcelimited="true" forcerange="-100 100" />
+    <motor name="LSY_J" joint="LSY_J" gear="1" ctrllimited="true" ctrlrange="-83.1 83.1" forcelimited="true" forcerange="-83.1 83.1" />
+    <motor name="LSP_J" joint="LSP_J" gear="1" ctrllimited="true" ctrlrange="-83.1 83.1" forcelimited="true" forcerange="-83.1 83.1" />
+    <motor name="LEP_J" joint="LEP_J" gear="1" ctrllimited="true" ctrlrange="-182.8 182.8" forcelimited="true" forcerange="-182.8 182.8" />
+    <motor name="LWP_J" joint="LWP_J" gear="1" ctrllimited="true" ctrlrange="-83.1 83.1" forcelimited="true" forcerange="-83.1 83.1" />
+    <motor name="RSY_J" joint="RSY_J" gear="1" ctrllimited="true" ctrlrange="-83.1 83.1" forcelimited="true" forcerange="-83.1 83.1" />
+    <motor name="RSP_J" joint="RSP_J" gear="1" ctrllimited="true" ctrlrange="-83.1 83.1" forcelimited="true" forcerange="-83.1 83.1" />
+    <motor name="REP_J" joint="REP_J" gear="1" ctrllimited="true" ctrlrange="-182.8 182.8" forcelimited="true" forcerange="-182.8 182.8" />
+    <motor name="RWP_J" joint="RWP_J" gear="1" ctrllimited="true" ctrlrange="-83.1 83.1" forcelimited="true" forcerange="-83.1 83.1" />
+    <motor name="LHP_J" joint="LHP_J" gear="1" ctrllimited="true" ctrlrange="-182.8 182.8" forcelimited="true" forcerange="-182.8 182.8" />
+    <motor name="LHR_J" joint="LHR_J" gear="1" ctrllimited="true" ctrlrange="-83.1 83.1" forcelimited="true" forcerange="-83.1 83.1" />
+    <motor name="LHY_J" joint="LHY_J" gear="1" ctrllimited="true" ctrlrange="-83.1 83.1" forcelimited="true" forcerange="-83.1 83.1" />
+    <motor name="LKP_J" joint="LKP_J" gear="1" ctrllimited="true" ctrlrange="-182.8 182.8" forcelimited="true" forcerange="-182.8 182.8" />
+    <motor name="LAP_J" joint="LAP_J" gear="1" ctrllimited="true" ctrlrange="-83.1 83.1" forcelimited="true" forcerange="-83.1 83.1" />
+    <motor name="LAR_J" joint="LAR_J" gear="1" ctrllimited="true" ctrlrange="-83.1 83.1" forcelimited="true" forcerange="-83.1 83.1" />
+    <motor name="RHP_J" joint="RHP_J" gear="1" ctrllimited="true" ctrlrange="-182.8 182.8" forcelimited="true" forcerange="-182.8 182.8" />
+    <motor name="RHR_J" joint="RHR_J" gear="1" ctrllimited="true" ctrlrange="-83.1 83.1" forcelimited="true" forcerange="-83.1 83.1" />
+    <motor name="RHY_J" joint="RHY_J" gear="1" ctrllimited="true" ctrlrange="-83.1 83.1" forcelimited="true" forcerange="-83.1 83.1" />
+    <motor name="RKP_J" joint="RKP_J" gear="1" ctrllimited="true" ctrlrange="-182.8 182.8" forcelimited="true" forcerange="-182.8 182.8" />
+    <motor name="RAP_J" joint="RAP_J" gear="1" ctrllimited="true" ctrlrange="-83.1 83.1" forcelimited="true" forcerange="-83.1 83.1" />
+    <motor name="RAR_J" joint="RAR_J" gear="1" ctrllimited="true" ctrlrange="-83.1 83.1" forcelimited="true" forcerange="-83.1 83.1" />
+  </actuator>
+  <sensor>
+    <framequat name="orientation" objtype="site" objname="imu" noise="0.001" />
+    <gyro name="angular_velocity" site="imu" noise="0.005" cutoff="34.9" />
+    <accelerometer name="linear_acceleration" site="imu" noise="0.01" cutoff="34.9" />
+    <jointpos name="CAM_J_pos" joint="CAM_J" />
+    <jointvel name="CAM_J_vel" joint="CAM_J" />
+    <actuatorfrc name="CAM_J_force" actuator="CAM_J" noise="0.001" />
+    <jointpos name="arm1_J_pos" joint="arm1_J" />
+    <jointvel name="arm1_J_vel" joint="arm1_J" />
+    <actuatorfrc name="arm1_J_force" actuator="arm1_J" noise="0.001" />
+    <jointpos name="arm2_J_pos" joint="arm2_J" />
+    <jointvel name="arm2_J_vel" joint="arm2_J" />
+    <actuatorfrc name="arm2_J_force" actuator="arm2_J" noise="0.001" />
+    <jointpos name="arm3_J_pos" joint="arm3_J" />
+    <jointvel name="arm3_J_vel" joint="arm3_J" />
+    <actuatorfrc name="arm3_J_force" actuator="arm3_J" noise="0.001" />
+    <jointpos name="arm4_J_pos" joint="arm4_J" />
+    <jointvel name="arm4_J_vel" joint="arm4_J" />
+    <actuatorfrc name="arm4_J_force" actuator="arm4_J" noise="0.001" />
+    <jointpos name="arm5_J_pos" joint="arm5_J" />
+    <jointvel name="arm5_J_vel" joint="arm5_J" />
+    <actuatorfrc name="arm5_J_force" actuator="arm5_J" noise="0.001" />
+    <jointpos name="arm6_J_pos" joint="arm6_J" />
+    <jointvel name="arm6_J_vel" joint="arm6_J" />
+    <actuatorfrc name="arm6_J_force" actuator="arm6_J" noise="0.001" />
+    <jointpos name="L_gripper_J_pos" joint="L_gripper_J" />
+    <jointvel name="L_gripper_J_vel" joint="L_gripper_J" />
+    <jointpos name="R_gripper_J_pos" joint="R_gripper_J" />
+    <jointvel name="R_gripper_J_vel" joint="R_gripper_J" />
+    <actuatorfrc name="R_gripper_J_force" actuator="R_gripper_J" noise="0.001" />
+    <jointpos name="LSY_J_pos" joint="LSY_J" />
+    <jointvel name="LSY_J_vel" joint="LSY_J" />
+    <actuatorfrc name="LSY_J_force" actuator="LSY_J" noise="0.001" />
+    <jointpos name="LSP_J_pos" joint="LSP_J" />
+    <jointvel name="LSP_J_vel" joint="LSP_J" />
+    <actuatorfrc name="LSP_J_force" actuator="LSP_J" noise="0.001" />
+    <jointpos name="LEP_J_pos" joint="LEP_J" />
+    <jointvel name="LEP_J_vel" joint="LEP_J" />
+    <actuatorfrc name="LEP_J_force" actuator="LEP_J" noise="0.001" />
+    <jointpos name="LWP_J_pos" joint="LWP_J" />
+    <jointvel name="LWP_J_vel" joint="LWP_J" />
+    <actuatorfrc name="LWP_J_force" actuator="LWP_J" noise="0.001" />
+    <jointpos name="RSY_J_pos" joint="RSY_J" />
+    <jointvel name="RSY_J_vel" joint="RSY_J" />
+    <actuatorfrc name="RSY_J_force" actuator="RSY_J" noise="0.001" />
+    <jointpos name="RSP_J_pos" joint="RSP_J" />
+    <jointvel name="RSP_J_vel" joint="RSP_J" />
+    <actuatorfrc name="RSP_J_force" actuator="RSP_J" noise="0.001" />
+    <jointpos name="REP_J_pos" joint="REP_J" />
+    <jointvel name="REP_J_vel" joint="REP_J" />
+    <actuatorfrc name="REP_J_force" actuator="REP_J" noise="0.001" />
+    <jointpos name="RWP_J_pos" joint="RWP_J" />
+    <jointvel name="RWP_J_vel" joint="RWP_J" />
+    <actuatorfrc name="RWP_J_force" actuator="RWP_J" noise="0.001" />
+    <jointpos name="LHP_J_pos" joint="LHP_J" />
+    <jointvel name="LHP_J_vel" joint="LHP_J" />
+    <actuatorfrc name="LHP_J_force" actuator="LHP_J" noise="0.001" />
+    <jointpos name="LHR_J_pos" joint="LHR_J" />
+    <jointvel name="LHR_J_vel" joint="LHR_J" />
+    <actuatorfrc name="LHR_J_force" actuator="LHR_J" noise="0.001" />
+    <jointpos name="LHY_J_pos" joint="LHY_J" />
+    <jointvel name="LHY_J_vel" joint="LHY_J" />
+    <actuatorfrc name="LHY_J_force" actuator="LHY_J" noise="0.001" />
+    <jointpos name="LKP_J_pos" joint="LKP_J" />
+    <jointvel name="LKP_J_vel" joint="LKP_J" />
+    <actuatorfrc name="LKP_J_force" actuator="LKP_J" noise="0.001" />
+    <jointpos name="LAP_J_pos" joint="LAP_J" />
+    <jointvel name="LAP_J_vel" joint="LAP_J" />
+    <actuatorfrc name="LAP_J_force" actuator="LAP_J" noise="0.001" />
+    <jointpos name="LAR_J_pos" joint="LAR_J" />
+    <jointvel name="LAR_J_vel" joint="LAR_J" />
+    <actuatorfrc name="LAR_J_force" actuator="LAR_J" noise="0.001" />
+    <jointpos name="RHP_J_pos" joint="RHP_J" />
+    <jointvel name="RHP_J_vel" joint="RHP_J" />
+    <actuatorfrc name="RHP_J_force" actuator="RHP_J" noise="0.001" />
+    <jointpos name="RHR_J_pos" joint="RHR_J" />
+    <jointvel name="RHR_J_vel" joint="RHR_J" />
+    <actuatorfrc name="RHR_J_force" actuator="RHR_J" noise="0.001" />
+    <jointpos name="RHY_J_pos" joint="RHY_J" />
+    <jointvel name="RHY_J_vel" joint="RHY_J" />
+    <actuatorfrc name="RHY_J_force" actuator="RHY_J" noise="0.001" />
+    <jointpos name="RKP_J_pos" joint="RKP_J" />
+    <jointvel name="RKP_J_vel" joint="RKP_J" />
+    <actuatorfrc name="RKP_J_force" actuator="RKP_J" noise="0.001" />
+    <jointpos name="RAP_J_pos" joint="RAP_J" />
+    <jointvel name="RAP_J_vel" joint="RAP_J" />
+    <actuatorfrc name="RAP_J_force" actuator="RAP_J" noise="0.001" />
+    <jointpos name="RAR_J_pos" joint="RAR_J" />
+    <jointvel name="RAR_J_vel" joint="RAR_J" />
+    <actuatorfrc name="RAR_J_force" actuator="RAR_J" noise="0.001" />
+  </sensor>
+  <custom>
+    <!-- URDF velocity limits: rad/s for hinge, m/s for slide; metadata only, controller enforcement required. -->
+    <numeric name="urdf_velocity_limit_CAM_J" data="100" />
+    <numeric name="urdf_velocity_limit_arm1_J" data="89.67" />
+    <numeric name="urdf_velocity_limit_arm2_J" data="28.17" />
+    <numeric name="urdf_velocity_limit_arm3_J" data="28.17" />
+    <numeric name="urdf_velocity_limit_arm4_J" data="89.67" />
+    <numeric name="urdf_velocity_limit_arm5_J" data="89.67" />
+    <numeric name="urdf_velocity_limit_arm6_J" data="89.67" />
+    <numeric name="urdf_velocity_limit_L_gripper_J" data="100" />
+    <numeric name="urdf_velocity_limit_R_gripper_J" data="100" />
+    <numeric name="urdf_velocity_limit_LSY_J" data="28.17" />
+    <numeric name="urdf_velocity_limit_LSP_J" data="28.17" />
+    <numeric name="urdf_velocity_limit_LEP_J" data="12.83" />
+    <numeric name="urdf_velocity_limit_LWP_J" data="28.17" />
+    <numeric name="urdf_velocity_limit_RSY_J" data="28.17" />
+    <numeric name="urdf_velocity_limit_RSP_J" data="28.17" />
+    <numeric name="urdf_velocity_limit_REP_J" data="12.83" />
+    <numeric name="urdf_velocity_limit_RWP_J" data="28.17" />
+    <numeric name="urdf_velocity_limit_LHP_J" data="12.83" />
+    <numeric name="urdf_velocity_limit_LHR_J" data="28.17" />
+    <numeric name="urdf_velocity_limit_LHY_J" data="28.17" />
+    <numeric name="urdf_velocity_limit_LKP_J" data="12.83" />
+    <numeric name="urdf_velocity_limit_LAP_J" data="28.17" />
+    <numeric name="urdf_velocity_limit_LAR_J" data="28.17" />
+    <numeric name="urdf_velocity_limit_RHP_J" data="12.83" />
+    <numeric name="urdf_velocity_limit_RHR_J" data="28.17" />
+    <numeric name="urdf_velocity_limit_RHY_J" data="28.17" />
+    <numeric name="urdf_velocity_limit_RKP_J" data="12.83" />
+    <numeric name="urdf_velocity_limit_RAP_J" data="28.17" />
+    <numeric name="urdf_velocity_limit_RAR_J" data="28.17" />
+  </custom>
+  <keyframe>
+    <key name="nominal" qpos="0 0 0.9 1 0 0 0 2.356194490192345 0 -0.2 0 0 0 0 0 0 0 0 -0.32 0 0 0 0.32 0 0 0 0 0 0 0 0 0 0 0 0 0" />
+  </keyframe>
+</mujoco>

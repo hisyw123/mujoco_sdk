@@ -1,0 +1,12 @@
+robots:
+  rough-terrain-3-bipedal:
+    model: ../../model/RoughTerrain-3/RoughTerrain-3_bipedal.xml
+    motor_contract: ../motor/config/rough_terrain_28dof.yaml
+    policy_contract: rl_policy.yaml
+    default_mode: rl
+  rough-terrain-3:
+    model: ../../model/RoughTerrain-3/RoughTerrain-3_quadrupedal.xml
+    motor_contract: ../motor/config/rough_terrain_28dof.yaml
+    policy_contract: rl_policy.yaml
+    default_mode: joint-trajectory
+    trajectory_contract: rough_terrain_joint_trajectory.yaml

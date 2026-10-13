@@ -1,0 +1,31 @@
+검증일: 2026-10-10
+정책: CaT model_10000.onnx (SOURCE.json 참조)
+
+빌드: 독립 CMake Release 빌드 성공.
+계약: 28/28 actuator binding, ONNX obs[1,45] -> actions[1,12] 검증 성공.
+C++ 테스트: body frame feedback, 관측/action 순서/scale, 50Hz scheduling,
+           Off/Estop 전체 출력 차단, 비정상 값 차단, checkpoint 불일치 거부 성공.
+Python ORT vs C++ ORT: 65개 입력, 출력 최대 절대 차이 0.
+GUI: Xvfb에서 메인 창+진단+depth 동시 실행 및 정상 종료 성공.
+
+원본 계단 환경 (20초):
+  command [0,0,0]: 1000회 추론, reset 0, fall 없음, 최저 z 0.987202m.
+  command [0.1,0,0]: 1000회 추론, reset 0, fall 없음, 최종 x 0.0856m.
+    이동이 거의 없어 속도 추종 성공으로 해석하지 않음.
+  command [0.3,0,0]: 계단 접촉 17.9890초, 넘어짐 기준 충족 19.4030초.
+    초기 추론 구동 실패/반복 초기화가 아니라 이동 후 계단 접촉과 넘어짐.
+    방향 편향이 누적되어 계단 방향으로 이동함.
+
+평지 (--flat-ground, command [0.3,0,0], 40초):
+  2000회 추론, reset 0, 넘어짐 없음.
+  최종 z 0.994286m, 최저 z 0.958543m, 최저 upright_cos 0.991631.
+  최종 x 5.1875m, y 9.7399m, yaw 1.9709rad.
+  wz 명령 0에도 yaw가 누적됨. 직진/회전 속도 추종은 미완료 검증 항목.
+  평지에서 실행 가능하다는 결과이며 계단 보행 성공을 의미하지 않음.
+
+수치 불안정으로 MuJoCo가 내부 상태를 초기화하면 경고/시간 역행을 감지해
+실행을 실패로 종료함. 프로젝트의 자동 episode reset은 없으며
+Backspace에 의한 사용자 초기화만 지원.
+
+원본 RobotPC, 기존 greeny 시뮬레이션, XML/mesh는 수정하지 않았음.
+ARM HRI 통신/매핑은 사용자 요청에 따라 보류. XML nominal 팔/그리퍼 유지.

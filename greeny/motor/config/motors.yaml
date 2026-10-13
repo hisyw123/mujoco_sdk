@@ -1,0 +1,12 @@
+# Same logical motor ordering is used by REAL SharedMemory and MuJoCo.
+# slave_index/type/control_mode may be added by the EtherCAT deployment; the
+# simulator deliberately ignores those hardware-only keys.
+motors:
+  - {name: LHY_J, joint_index: 0, joint_name: LHY_J, actuator_name: LHY_J, p_gain: 80.0, d_gain: 1.0, home_position: 0.0}
+  - {name: LHP_J, joint_index: 1, joint_name: LHP_J, actuator_name: LHP_J, p_gain: 80.0, d_gain: 1.0, home_position: -1.00881}
+  - {name: LKP_J, joint_index: 2, joint_name: LKP_J, actuator_name: LKP_J, p_gain: 80.0, d_gain: 1.0, home_position: 2.01762}
+  - {name: LWP_J, joint_index: 3, joint_name: LWP_J, actuator_name: LWP_J, p_gain: 15.0, d_gain: 1.0, home_position: 0.0, continuous: true, wheel: true}
+  - {name: RHY_J, joint_index: 4, joint_name: RHY_J, actuator_name: RHY_J, p_gain: 80.0, d_gain: 1.0, home_position: 0.0}
+  - {name: RHP_J, joint_index: 5, joint_name: RHP_J, actuator_name: RHP_J, p_gain: 80.0, d_gain: 1.0, home_position: 1.00881}
+  - {name: RKP_J, joint_index: 6, joint_name: RKP_J, actuator_name: RKP_J, p_gain: 80.0, d_gain: 1.0, home_position: -2.01762}
+  - {name: RWP_J, joint_index: 7, joint_name: RWP_J, actuator_name: RWP_J, p_gain: 15.0, d_gain: 1.0, home_position: 0.0, continuous: true, wheel: true}

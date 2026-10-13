@@ -1,0 +1,15 @@
+{
+  "source": "/home/dongju/mujoco/model/RoughTerrain-3/RoughTerrain-3_bipedal.xml",
+  "source_sha256": "92eafdbe54b6ed9048bd2e016f20fd5b83749b379e1ffca4c6f254661e0b348e",
+  "output_sha256": "088deca8078347fcd46ad82eb1efee1808e204b7b5bd07be349b9ef68aac5a97",
+  "changes": [
+    "root freejoint removed: root body world pose retained",
+    "two gripper slide joints fixed at their zero position, bodies/masses retained",
+    "equality removed, grippers are now rigid",
+    "native actuators and sensors removed: external joint torques used",
+    "nominal keyframe reduced to 27 hinge coordinates",
+    "mesh/texture paths resolved, source inertias and balanceinertia retained",
+    "runtime disables contact and uses sampled external PD + Euler"
+  ],
+  "warning": "Stand identification variant, NOT original floating/contact locomotion scene."
+}

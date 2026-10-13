@@ -1,0 +1,96 @@
+--- /home/dongju/Downloads/actuator-net-gym-articulated-main/scripts/train.py
++++ /home/dongju/mujoco/raionActuatorNet/scripts/train.py
+@@ -2,7 +2,7 @@
+ """Train the ActuatorNet on one-step transition errors between a measured robot and the nominal model.
+ 
+ Inputs are measured robot logs (or replay CSVs already produced by `augmented_sim replay`, detected
+-by the err_tau_0 column). For every measured state the C++ tool integrates the nominal RaiSim model
++by the err_tau_0 column). For every measured state the C++ backend integrates the nominal MuJoCo model
+ one control tick and reports the torque that would have reproduced the measured velocity change
+ (err_tau). The net learns err_tau from the joint history; the TorchScript it writes drives
+ `augmented_sim rollout`.
+@@ -16,6 +16,7 @@
+ import json
+ import pathlib
+ import tempfile
++import time
+ from typing import Tuple
+ 
+ import numpy as np
+@@ -24,7 +25,7 @@
+ import torch.nn as nn
+ 
+ from common import (FEATURES, add_sim_args, block_mask, build_features, cols, load_csv, n_joints,
+-                    prediction_rate, run_sim, sim_opts)
++                    prediction_rate, run_sim, sim_opts, simulator_contract, check_log_metadata)
+ 
+ 
+ class ActuatorNet(nn.Module):
+@@ -100,10 +101,20 @@
+     ap.add_argument("--seed", type=int, default=0)
+     add_sim_args(ap)
+     args = ap.parse_args()
++    started=time.perf_counter()
++    if min(args.epochs, args.batch, args.hidden, args.layers, args.patience) < 1:
++        ap.error('epochs/batch/hidden/layers/patience must be positive')
++    if args.chunk_s <= 0 or args.warmup_s < 0 or args.val_block <= 0 or args.lr <= 0:
++        ap.error('invalid window/warmup/validation/lr')
+     torch.manual_seed(args.seed)
+     out = pathlib.Path(args.out)
++    if out.exists() and any(out.iterdir()):
++        raise ValueError('output directory is not empty; choose a new run')
+     out.mkdir(parents=True, exist_ok=True)
+     dev = "cuda" if torch.cuda.is_available() else "cpu"
++    contract = simulator_contract(sim_opts(args))
++    for path in args.inputs:
++        check_log_metadata(path, contract)
+ 
+     seqs, times, nJ = [], [], None   # per log: (features (T,F), targets (T,nJ), validation mask (T,))
+     for df in load_replays(args.inputs, sim_opts(args), args.smooth):
+@@ -119,12 +130,15 @@
+     x_all = np.concatenate([s[0] for s in seqs])
+     y_all = np.concatenate([s[1] for s in seqs])
+     v_all = np.concatenate([s[2] for s in seqs])
++    if not v_all.any() or v_all.all():
++        raise ValueError('log does not contain both train and validation blocks')
+     x_mean, x_std = x_all[~v_all].mean(0), x_all[~v_all].std(0)
+     y_mean, y_std = y_all[~v_all].mean(0), y_all[~v_all].std(0)
+     x_std[x_std < 1e-8] = 1.0
+     y_std[y_std < 1e-8] = 1.0
+     cfg = dict(n_joints=nJ, features=args.features, hidden=args.hidden, layers=args.layers,
+                inputs=args.inputs, smooth=args.smooth, stride=args.stride, steps=args.steps,
++               simulator=contract,
+                val_block=args.val_block, x_mean=x_mean.tolist(), x_std=x_std.tolist(),
+                y_mean=y_mean.tolist(), y_std=y_std.tolist())
+     print(f"{len(x_all)} ticks over {len(seqs)} log(s), {nJ} joints, {x_all.shape[1]} features, "
+@@ -135,6 +149,8 @@
+     dt = float(np.median(np.diff(times[0])))
+     chunk = max(8, int(round(args.chunk_s / dt)))
+     warmup = min(chunk - 4, max(1, int(round(args.warmup_s / dt))))
++    if any(len(x) < chunk for x, _, _ in seqs):
++        raise ValueError('each log must contain at least one full BPTT window')
+     # overlapping contiguous windows; the first `warmup` samples burn in the hidden state
+     starts = [(i, s) for i, (x, _, _) in enumerate(seqs)
+               for s in range(0, max(1, len(x) - chunk), max(1, chunk // 2))]
+@@ -147,6 +163,8 @@
+     is_val = torch.tensor(np.array([seqs[i][2][s + warmup:s + chunk].mean() > 0.5
+                                     for i, s in starts]), device=dev)
+     tr_w, va_w = (~is_val).nonzero().squeeze(1), is_val.nonzero().squeeze(1)
++    if not len(tr_w) or not len(va_w):
++        raise ValueError('need both train and validation windows; use longer logs')
+     print(f"{len(starts)} windows of {chunk} samples ({chunk * dt:.2f} s), warmup {warmup}: "
+           f"{len(tr_w)} train, {len(va_w)} val")
+ 
+@@ -205,7 +223,12 @@
+     print(json.dumps({k: v for k, v in metrics.items() if k != "val_rmse_per_joint_nm"}, indent=1))
+ 
+     torch.save(net.state_dict(), out / "actuator_net.pt")
++    cfg['training_summary']=dict(epochs_completed=len(hist),windows=len(starts),
++                                 prediction_samples=len(x_all),wall_seconds=time.perf_counter()-started)
++    print('training (including replay):',cfg['training_summary'])
+     export_jit(net, cfg, out / "actuator_net_jit.pt")
++    from export_cpp import export_cpp
++    export_cpp(net, cfg, out / "actuator_net_cpp.json")
+     json.dump(dict(cfg, metrics=metrics), open(out / "config.json", "w"), indent=1)
+     pd.DataFrame(hist, columns=["epoch", "train_loss", "val_loss"]).to_csv(out / "training_history.csv", index=False)
+     print(f"saved to {out}")

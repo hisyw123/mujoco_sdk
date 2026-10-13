@@ -1,0 +1,400 @@
+--- /home/dongju/Downloads/actuator-net-gym-articulated-main/src/augmented_sim.cpp
++++ /home/dongju/mujoco/raionActuatorNet/src/augmented_sim.cpp
+@@ -1,4 +1,4 @@
+-// ActuatorNet-augmented RaiSim simulator for a fixed-base articulated system.
++// ActuatorNet-augmented MuJoCo simulator for a fixed-base articulated system.
+ //
+ //   augmented_sim replay  <log.csv> <out.csv> --urdf robot.urdf [opts]
+ //       one-step transitions from every logged state -> training targets (err_tau)
+@@ -28,9 +28,7 @@
+ // The joint count comes from the file and must match the URDF's degrees of freedom.
+ // By default each integration step uses that row's own dt, so a jittering log is replayed on its
+ // true time base instead of an averaged one; --steps and --fixed-dt override that.
+-#include <raisim/World.hpp>
+-#include <torch/script.h>
+-#include <ATen/Parallel.h>
++#include <mujoco/mujoco.h>
+ #include <Eigen/Core>
+ 
+ #include <algorithm>
+@@ -44,6 +42,10 @@
+ #include <stdexcept>
+ #include <string>
+ #include <vector>
++#include <filesystem>
++#include <random>
++#include "net.h"
++#include "viewer.h"
+ 
+ namespace {
+ 
+@@ -52,6 +54,10 @@
+ using Step = Eigen::Matrix<double, 3, Eigen::Dynamic>;  // rows: posErr, vel, torque at one sample
+ 
+ struct Opt {
++  std::string jointConfig;
++  bool viewer=false,realtime=false;
++  double speed=1,seconds=20,dt=.001,amplitude=.05,frequency=.5,scale=1,damping=0,noiseQ=0,noiseV=0;
++  int seed=0;
+   std::string mode, in, out, urdf, model, ffCol;  // ffCol: feed <ffCol>_j from the input CSV as feedforward
+   double kp = 100., kd = 1.;
+   int stride = 1, offset = 0, steps = 0;   // steps: physics steps per prediction, 0 = one per log tick
+@@ -65,11 +71,24 @@
+   if (argc < 4) throw std::runtime_error(usage);
+   Opt o;
+   o.mode = argv[1]; o.in = argv[2]; o.out = argv[3];
+-  if (o.mode != "replay" && o.mode != "rollout") throw std::runtime_error(usage);
++  if (o.mode != "replay" && o.mode != "rollout" && o.mode != "collect" && o.mode != "inspect") throw std::runtime_error(usage);
+   for (int i = 4; i < argc; ++i) {
+     std::string a = argv[i];
+     auto next = [&] { if (++i >= argc) throw std::runtime_error(usage); return std::string(argv[i]); };
+     if (a == "--urdf") o.urdf = next();
++    else if (a == "--joint-config") o.jointConfig=next();
++    else if (a == "--viewer") o.viewer=true;
++    else if (a == "--realtime") o.realtime=true;
++    else if (a == "--viewer-speed") o.speed=std::stod(next());
++    else if (a == "--seconds") o.seconds=std::stod(next());
++    else if (a == "--dt") o.dt=std::stod(next());
++    else if (a == "--amplitude") o.amplitude=std::stod(next());
++    else if (a == "--frequency") o.frequency=std::stod(next());
++    else if (a == "--torque-scale") o.scale=std::stod(next());
++    else if (a == "--extra-damping") o.damping=std::stod(next());
++    else if (a == "--noise-q") o.noiseQ=std::stod(next());
++    else if (a == "--noise-v") o.noiseV=std::stod(next());
++    else if (a == "--seed") o.seed=std::stoi(next());
+     else if (a == "--model") o.model = next();
+     else if (a == "--ff-column") o.ffCol = next();
+     else if (a == "--stride") o.stride = std::stoi(next());
+@@ -81,6 +100,11 @@
+     else throw std::runtime_error("unknown option " + a + "\n" + usage);
+   }
+   if (o.urdf.empty()) throw std::runtime_error("--urdf is required\n" + std::string(usage));
++  for(double v:{o.kp,o.kd,o.speed,o.seconds,o.dt,o.amplitude,o.frequency,o.scale,o.damping,o.noiseQ,o.noiseV,o.fixedDt})
++    if(!std::isfinite(v)) throw std::runtime_error("nonfinite option");
++  if(o.kp<0||o.kd<0||o.speed<=0||o.dt<=0||o.seconds<o.dt*2||o.noiseQ<0||o.noiseV<0||o.damping<0)
++    throw std::runtime_error("invalid gains/time/noise parameters");
++  if(o.viewer && o.mode=="replay") throw std::runtime_error("viewer supports collect/rollout only");
+   if (o.stride < 1) throw std::runtime_error("--stride must be >= 1");
+   if (o.offset < 0 || o.offset >= o.stride) throw std::runtime_error("--offset must be in [0, stride)");
+   if (o.steps < 0) throw std::runtime_error("--steps must be >= 1, or 0 to follow the log");
+@@ -139,6 +163,8 @@
+     // some loggers append a row per control loop pass, not per tick; rows repeating elapsedTime are
+     // stale re-logs of the same instant, so keep the first of each group
+     if (r[te] == lastT) continue;
++    if(!std::all_of(r.begin(),r.end(),[](double x){return std::isfinite(x);}) || (!t.rows.empty()&&r[te]<lastT))
++      throw std::runtime_error("nonfinite data or non-increasing time");
+     lastT = r[te];
+     t.rows.push_back(std::move(r));
+   }
+@@ -149,88 +175,98 @@
+ // GRU over the whole joint vector: every joint's history feeds one recurrent state and all joint
+ // torque errors come out together, so inter-joint coupling is available to the model. The state is
+ // carried across steps here, exactly as the trainer rolls it forward within a window.
+-struct Net {
+-  torch::jit::script::Module m;
+-  std::vector<int64_t> features;
+-  torch::Tensor state;
+-  int64_t nf = 0;
++// Native Eigen GRU in net.h.
++
++struct Sim {
++  struct ModelDeleter { void operator()(mjModel* p) const { mj_deleteModel(p); } };
++  struct DataDeleter { void operator()(mjData* p) const { mj_deleteData(p); } };
++  std::unique_ptr<mjModel, ModelDeleter> model;
++  std::unique_ptr<mjData, DataDeleter> data;
+   int nJ = 0;
+-
+-  Net(const std::string& path, int nJoints) : m(torch::jit::load(path)), nJ(nJoints) {
+-    m.eval();
+-    torch::Tensor f = m.attr("features").toTensor().to(torch::kInt64).contiguous();
+-    features.assign(f.data_ptr<int64_t>(), f.data_ptr<int64_t>() + f.numel());
+-    nf = static_cast<int64_t>(features.size());
+-    const int modelJoints = static_cast<int>(m.attr("n_joints").toInt());
+-    if (modelJoints != nJ)
+-      throw std::runtime_error("model was trained for " + std::to_string(modelJoints) +
+-                               " joints, data has " + std::to_string(nJ));
+-    state = torch::zeros({m.attr("layers").toInt(), 1, m.attr("hidden").toInt()});
+-    std::cout << "model " << path << ": hidden=" << m.attr("hidden").toInt()
+-              << " layers=" << m.attr("layers").toInt() << " features=";
+-    for (auto c : features) std::cout << c << ' ';
+-    std::cout << '\n';
+-  }
+-
+-  // x = [feature0 over all joints | feature1 over all joints | ...], the order build_features()
+-  // produces in scripts/common.py
+-  Eigen::VectorXd predict(const Step& s) {
+-    torch::NoGradGuard ng;
+-    torch::Tensor x = torch::zeros({1, nf * nJ});
+-    auto a = x.accessor<float, 2>();
+-    for (int64_t i = 0; i < nf; ++i)
+-      for (int j = 0; j < nJ; ++j) a[0][i * nJ + j] = static_cast<float>(s(features[i], j));
+-    auto out = m.forward({x, state}).toTuple();
+-    state = out->elements()[1].toTensor();
+-    auto y = out->elements()[0].toTensor().reshape({nJ}).to(torch::kDouble).contiguous();
+-    return Eigen::Map<Eigen::VectorXd>(y.data_ptr<double>(), nJ);
+-  }
+-};
+-
+-struct Sim {
+-  raisim::World world;
+-  raisim::ArticulatedSystem* robot = nullptr;
+-  int nJ = 0;
+-  Eigen::VectorXd kp, kd, zero;
++  Eigen::VectorXd kp, kd;
++  std::vector<int> qa,va;
++  std::vector<std::string> names;
++  std::unique_ptr<Viewer> view;
+ 
+   Sim(const Opt& o, int nJoints) : nJ(nJoints) {
+-    std::ifstream f(o.urdf);
+-    if (!f) throw std::runtime_error("cannot open urdf " + o.urdf);
+-    std::stringstream ss;
+-    ss << f.rdbuf();
+-    std::string urdf = ss.str();
+-    // Fixed base: raisim treats a link named "world" joined rigidly to the root as a fixed base
+-    // (see raisimLib/rsc/kinova). Root = first <link> in the file. Skipped if the URDF already
+-    // defines its own world link.
+-    if (urdf.find("\"world\"") == std::string::npos) {
+-      auto p = urdf.find("<link");
+-      p = urdf.find("name=\"", p) + 6;
+-      const std::string root = urdf.substr(p, urdf.find('"', p) - p);
+-      urdf.insert(urdf.rfind("</robot>"),
+-                  "<link name=\"world\"/><joint name=\"world_to_" + root + "\" type=\"fixed\">"
+-                  "<parent link=\"world\"/><child link=\"" + root + "\"/></joint>\n");
+-      std::cout << "fixed base added at root link " << root << '\n';
+-    }
+-    const auto slash = o.urdf.rfind('/');
+-    const std::string meshDir = slash == std::string::npos ? "." : o.urdf.substr(0, slash) + "/../meshes";
+-    robot = world.addArticulatedSystem(urdf, meshDir);
+-    if (static_cast<int>(robot->getGeneralizedCoordinateDim()) != nJ)
+-      throw std::runtime_error("urdf has " + std::to_string(robot->getGeneralizedCoordinateDim()) +
+-                               " generalized coordinates, the log has " + std::to_string(nJ) +
+-                               " joints. A floating base is not supported.");
++    std::ifstream source(o.urdf);
++    std::stringstream contents;contents<<source.rdbuf();
++    if(contents.str().find("<mimic")!=std::string::npos) throw std::runtime_error("raw URDF mimic unsupported; use an explicit stand model");
++    char error[1024] = {};
++    model.reset(mj_loadXML(o.urdf.c_str(), nullptr, error, sizeof(error)));
++    if (!model) throw std::runtime_error("cannot load URDF " + o.urdf + ": " + error);
++    if(nJ<0) nJ=model->nv;
++    if (model->nq != nJ || model->nv != nJ)
++      throw std::runtime_error("URDF has nq=" + std::to_string(model->nq) +
++                               ", nv=" + std::to_string(model->nv) + ", but the log has " +
++                               std::to_string(nJ) +
++                               " joints. Only a fixed base with 1-DoF joints is supported.");
++    for (int j = 0; j < model->njnt; ++j)
++      if (model->jnt_type[j] != mjJNT_HINGE && model->jnt_type[j] != mjJNT_SLIDE)
++        throw std::runtime_error("only hinge/revolute and slide/prismatic joints are supported");
++    if(model->neq||model->ntendon) throw std::runtime_error("use independent fixed-base model; equality/tendon unsupported");
++    model->opt.integrator=mjINT_EULER;
++    model->opt.disableflags|=mjDSBL_CONTACT|mjDSBL_ACTUATION;
++    data.reset(mj_makeData(model.get()));
++    if (!data) throw std::runtime_error("MuJoCo could not allocate simulation data");
+     kp = Eigen::VectorXd::Constant(nJ, o.kp);
+     kd = Eigen::VectorXd::Constant(nJ, o.kd);
+-    zero = Eigen::VectorXd::Zero(nJ);
+-    robot->setPdGains(kp, kd);   // PD_PLUS_FEEDFORWARD_TORQUE
+-    std::cout << nJ << " joints, kp=" << o.kp << " kd=" << o.kd << '\n';
+-  }
+-
+-  // Each transition is integrated with its own dt, taken from the log.
++    for(int j=0;j<nJ;j++) {
++      const char* name=mj_id2name(model.get(),mjOBJ_JOINT,j);
++      if(!name) throw std::runtime_error("joint must be named");
++      names.push_back(name);qa.push_back(model->jnt_qposadr[j]);va.push_back(model->jnt_dofadr[j]);
++    }
++    if(!o.jointConfig.empty()) {
++      auto joints=YAML::LoadFile(o.jointConfig)["joints"];
++      if(int(joints.size())!=nJ) throw std::runtime_error("joint-config size mismatch");
++      std::vector<int> used;
++      for(int j=0;j<nJ;j++) {
++        names[j]=joints[j]["name"].as<std::string>();
++        int id=mj_name2id(model.get(),mjOBJ_JOINT,names[j].c_str());
++        if(id<0||std::find(used.begin(),used.end(),id)!=used.end()) throw std::runtime_error("invalid/duplicate joint name");
++        used.push_back(id);qa[j]=model->jnt_qposadr[id];va[j]=model->jnt_dofadr[id];
++        kp[j]=joints[j]["kp"].as<double>();kd[j]=joints[j]["kd"].as<double>();
++      }
++    }
++    if(!kp.allFinite()||!kd.allFinite()||(kp.array()<0).any()||(kd.array()<0).any()) throw std::runtime_error("invalid gains");
++    view=std::make_unique<Viewer>(model.get(),o.viewer,o.realtime,o.speed);
++    std::cout << nJ << " joints, MuJoCo " << mj_versionString()
++              << ", kp=" << o.kp << " kd=" << o.kd << '\n';
++  }
++
++  void setState(const Eigen::VectorXd& q, const Eigen::VectorXd& u) {
++    mj_resetData(model.get(),data.get());
++    for(int j=0;j<nJ;j++){data->qpos[qa[j]]=q[j];data->qvel[va[j]]=u[j];}
++    mj_forward(model.get(), data.get());
++  }
++
++  void getState(Eigen::VectorXd& q, Eigen::VectorXd& u) const {
++    q.resize(nJ);u.resize(nJ);
++    for(int j=0;j<nJ;j++){q[j]=data->qpos[qa[j]];u[j]=data->qvel[va[j]];}
++  }
++
++  Eigen::MatrixXd massMatrix() const {
++    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> dense(nJ, nJ);
++    mj_fullM(model.get(), data.get(), dense.data());
++    Eigen::MatrixXd ordered(nJ,nJ);
++    for(int i=0;i<nJ;i++) for(int j=0;j<nJ;j++) ordered(i,j)=dense(va[i],va[j]);
++    return ordered;
++  }
++
+   void step(double dt, const Eigen::VectorXd& pTarget, const Eigen::VectorXd& ff) {
+-    world.setTimeStep(dt);
+-    robot->setPdTarget(pTarget, zero);
+-    robot->setGeneralizedForce(ff);
+-    world.integrate();
++    Eigen::VectorXd q,u;getState(q,u);
++    torqueStep(dt,kp.cwiseProduct(pTarget-q)-kd.cwiseProduct(u)+ff);
++  }
++  void torqueStep(double dt,const Eigen::VectorXd& tau) {
++    if(!std::isfinite(dt)||dt<=0||!tau.allFinite()) throw std::runtime_error("invalid step/torque");
++    model->opt.timestep = dt;
++    for(int j=0;j<nJ;j++) data->qfrc_applied[va[j]]=tau[j];
++    double before=data->time;
++    int warns[mjNWARNING];for(int k=0;k<mjNWARNING;k++) warns[k]=data->warning[k].number;
++    mj_step(model.get(), data.get());
++    for(int k=0;k<mjNWARNING;k++) if(data->warning[k].number>warns[k]) throw std::runtime_error("MuJoCo warning; unstable settings");
++    if(std::abs(data->time-before-dt)>1e-9) throw std::runtime_error("MuJoCo reset detected");
++    view->update(model.get(),data.get());
+   }
+ };
+ 
+@@ -239,7 +275,7 @@
+   int nJ;
+   Csv(const std::string& path, int nJoints) : f(path), nJ(nJoints) {
+     if (!f) throw std::runtime_error("cannot write " + path);
+-    f << std::setprecision(10);
++    f << std::setprecision(17);
+   }
+   void header(const std::vector<std::string>& blocks) {
+     f << "elapsedTime";
+@@ -279,6 +315,7 @@
+   // --offset shifts which ticks the intervals start on. At stride N the log holds N interleaved
+   // sequences at the prediction rate; training on all of them recovers the samples decimation drops.
+   const size_t off = static_cast<size_t>(o.offset);
++  if(off>=in.rows.size()-1) throw std::runtime_error("offset leaves no complete interval");
+   const size_t nInt = (in.rows.size() - 1 - off) / S;
+   if (nInt == 0) throw std::runtime_error("--stride is larger than the log");
+   Eigen::VectorXd qs(nJ), us(nJ), ff = Eigen::VectorXd::Zero(nJ), sqQ = ff, sqU = ff;
+@@ -289,8 +326,8 @@
+         : Eigen::VectorXd(sim.kp.cwiseProduct(p - q) - sim.kd.cwiseProduct(u));
+     if (net) ff = net->predict(makeStep(p - q, u, tau));
+     if (!o.ffCol.empty()) ff = in.vec(t0, o.ffCol + "_");
+-    sim.robot->setState(q, u);
+-    const Eigen::MatrixXd M = sim.robot->getMassMatrix().e();
++    sim.setState(q, u);
++    const Eigen::MatrixXd M = sim.massMatrix();
+     // the feedforward torque is held across the interval; the PD target still follows the log tick
+     // by tick, because that is what the real controller did
+     const double T = in.t(t0 + S) - in.t(t0);
+@@ -301,7 +338,7 @@
+       // physics finer than the network: follow the log tick by tick, target and all
+       for (size_t i = 0; i < S; ++i) sim.step(in.dt(t0 + i), in.vec(t0 + i, "ptarget_"), ff);
+     }
+-    sim.robot->getState(qs, us);
++    sim.getState(qs, us);
+     const Eigen::VectorXd errQ = in.vec(t0 + S, "gc_") - qs, errU = in.vec(t0 + S, "gv_") - us;
+     // Torque that would have produced the measured velocity change over this interval. tau = M*a + h,
+     // but both transitions start from the same state, so h(q,u) is identical in each and cancels in
+@@ -401,9 +438,10 @@
+   const size_t n = ticks.size();
+   const size_t S = plan.predEvery;
+   Eigen::VectorXd qs(nJ), us(nJ), ff = Eigen::VectorXd::Zero(nJ), sqQ = ff, sqU = ff;
+-  sim.robot->setState(ticks[0].q, ticks[0].u);
++  sim.setState(ticks[0].q, ticks[0].u);
++  sim.data->time=ticks[0].t;sim.view->start(ticks[0].t);
+   for (size_t t = 0; t < n; ++t) {
+-    sim.robot->getState(qs, us);
++    sim.getState(qs, us);
+     const Tick& k = ticks[t];
+     // the network runs once per interval and its torque is held in between; physics runs every step
+     if (t % S == 0 && t + 1 < n) {
+@@ -422,18 +460,85 @@
+   report("rollout gv error", sqU, n);
+ }
+ 
++void inspect(const Opt& o) {
++  Sim s(o,-1);
++  std::ofstream f(o.out);
++  f<<std::setprecision(17)<<"{\"backend\":\"mujoco_cpp_explicit_pd_v1\",\"mujoco\":"<<std::quoted(mj_versionString())
++   <<",\"joint_names\":[";
++  for(int j=0;j<s.nJ;j++)f<<(j?",":"")<<std::quoted(s.names[j]);
++  f<<"],\"kp\":[";
++  for(int j=0;j<s.nJ;j++)f<<(j?",":"")<<s.kp[j];
++  f<<"],\"kd\":[";
++  for(int j=0;j<s.nJ;j++)f<<(j?",":"")<<s.kd[j];
++  f<<"],\"integrator\":\"Euler\",\"contacts\":false,\"native_actuators\":false}\n";
++  mj_saveModel(s.model.get(),(o.out+".mjb").c_str(),nullptr,0);
++}
++
++void collect(const Opt& o) {
++  Sim s(o,-1);
++  int n=s.nJ;
++  long ticks=std::lround(o.seconds/o.dt);
++  if(std::abs(ticks*o.dt-o.seconds)>1e-9)throw std::runtime_error("seconds must be an integer multiple of dt");
++  Eigen::VectorXd center(n),amp=Eigen::VectorXd::Constant(n,std::abs(o.amplitude)),phase(n),q(n),v(n),p(n);
++  if(s.model->nkey) mj_resetDataKeyframe(s.model.get(),s.data.get(),0);
++  s.getState(center,v);
++  // Keep trajectories within joint limits; qpos from first keyframe when supplied.
++  for(int j=0;j<n;j++){
++    int id=mj_name2id(s.model.get(),mjOBJ_JOINT,s.names[j].c_str());
++    if(s.model->jnt_limited[id]){
++      double lo=s.model->jnt_range[2*id],hi=s.model->jnt_range[2*id+1],margin=.1*(hi-lo);
++      center[j]=std::clamp(center[j],lo+margin,hi-margin);
++      amp[j]=std::min(amp[j],.9*std::min(center[j]-lo,hi-center[j]));
++    }
++  }
++  std::mt19937 trajectory(o.seed),sensorQ(o.seed+104729),sensorV(o.seed+130363);
++  std::uniform_real_distribution<double> uniform(-3.141592653589793,3.141592653589793);
++  std::normal_distribution<double> noise(0.,1.);
++  for(int j=0;j<n;j++)phase[j]=uniform(trajectory);
++  s.setState(center,Eigen::VectorXd::Zero(n));s.view->start(0);
++  Csv out(o.out,n);out.header({"gc","gv","ptarget","gf","truth_gc","truth_gv","command"});
++  auto start=std::chrono::steady_clock::now();
++  for(long k=0;k<=ticks;k++){
++    double t=k*o.dt,u=std::min(1.,t),ramp=3*u*u-2*u*u*u;
++    s.getState(q,v);
++    for(int j=0;j<n;j++) p[j]=center[j]+amp[j]*ramp*std::sin(2*3.141592653589793*o.frequency*t+phase[j]);
++    Eigen::VectorXd mq=q,mv=v;
++    for(int j=0;j<n;j++){mq[j]+=o.noiseQ*noise(sensorQ);mv[j]+=o.noiseV*noise(sensorV);}
++    Eigen::VectorXd command=s.kp.cwiseProduct(p-q)-s.kd.cwiseProduct(v);
++    Eigen::VectorXd tau=o.scale*command-o.damping*v;
++    out.row(t,{&mq,&mv,&p,&tau,&q,&v,&command});
++    if(k<ticks)s.torqueStep(o.dt,tau);
++  }
++  double wall=std::chrono::duration<double>(std::chrono::steady_clock::now()-start).count();
++  std::cout<<"SYNTHETIC collection: simulated_seconds="<<o.seconds<<" wall_seconds="<<wall
++    <<" rows="<<ticks+1<<" speedup="<<o.seconds/wall<<"x\n";
++  std::ofstream meta(o.out+".collection.json");
++  meta<<std::setprecision(17)<<"{\"simulated_seconds\":"<<o.seconds<<",\"wall_seconds\":"<<wall
++      <<",\"rows\":"<<ticks+1<<",\"center\":[";
++  for(int j=0;j<n;j++)meta<<(j?",":"")<<center[j];
++  meta<<"],\"amplitude\":[";
++  for(int j=0;j<n;j++)meta<<(j?",":"")<<amp[j];
++  meta<<"],\"phase\":[";
++  for(int j=0;j<n;j++)meta<<(j?",":"")<<phase[j];
++  meta<<"]}\n";
++}
+ }  // namespace
+ 
+ int main(int argc, char** argv) {
+   try {
+     const Opt o = parseArgs(argc, argv);
+-    at::set_num_threads(1);
++    if(std::filesystem::exists(o.out)) throw std::runtime_error("output exists; choose a new path");
++    auto parent=std::filesystem::path(o.out).parent_path();if(!parent.empty())std::filesystem::create_directories(parent);
++    if(o.mode=="inspect"){inspect(o);return 0;}
++    if(o.mode=="collect"){collect(o);return 0;}
++    auto started=std::chrono::steady_clock::now();
+     const Table in = readCsv(o.in);
+     const double span = in.t(in.rows.size() - 1) - in.t(0);
+     std::cout << in.rows.size() << " rows, " << span << " s, " << in.nJ << " joints, stride "
+               << o.stride << " -> prediction at "
+               << (span > 0. ? (in.rows.size() - 1) / span / o.stride : 0.) << " Hz\n";
+     if (o.mode == "replay") replay(o, in); else rollout(o, in);
++    std::cout<<"simulated_seconds="<<span<<" wall_seconds="<<std::chrono::duration<double>(std::chrono::steady_clock::now()-started).count()<<"\n";
+     std::cout << "wrote " << o.out << "\n";
+   } catch (const std::exception& e) {
+     std::cerr << "error: " << e.what() << "\n";

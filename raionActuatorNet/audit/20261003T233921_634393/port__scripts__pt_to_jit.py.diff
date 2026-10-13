@@ -1,0 +1,11 @@
+--- /home/dongju/Downloads/actuator-net-gym-articulated-main/scripts/pt_to_jit.py
++++ /home/dongju/mujoco/raionActuatorNet/scripts/pt_to_jit.py
+@@ -20,6 +20,8 @@
+     net = ActuatorNet(len(cfg["x_mean"]), cfg["hidden"], cfg["layers"], cfg["n_joints"])
+     net.load_state_dict(torch.load(d / "actuator_net.pt", map_location="cpu", weights_only=True))
+     export_jit(net.eval(), cfg, d / "actuator_net_jit.pt")
++    from export_cpp import export_cpp
++    export_cpp(net,cfg,d/"actuator_net_cpp.json")
+     print(f"wrote {d / 'actuator_net_jit.pt'}")
+ 
+ 

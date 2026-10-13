@@ -1,0 +1,39 @@
+--- /home/dongju/Downloads/actuator-net-gym-articulated-main/CMakeLists.txt
++++ /home/dongju/actuator-net-gym-articulated-main/CMakeLists.txt
+@@ -6,13 +6,32 @@
+   set(CMAKE_BUILD_TYPE Release)
+ endif()
+ 
+-# Fallbacks for this machine; override with -DCMAKE_PREFIX_PATH="<raisim>;<libtorch>" elsewhere.
+-list(APPEND CMAKE_PREFIX_PATH /root/lib/raisimLib/raisim/linux /root/lib/libtorch)
++# Override with -DCMAKE_PREFIX_PATH="<mujoco>;<libtorch>" when needed.
++list(APPEND CMAKE_PREFIX_PATH /root/lib/libtorch)
+ 
+-find_package(raisim CONFIG REQUIRED)
++find_package(mujoco CONFIG QUIET)
++if(NOT TARGET mujoco::mujoco)
++  set(MUJOCO_ROOT "" CACHE PATH "MuJoCo SDK or Python package directory")
++  find_path(MUJOCO_INCLUDE_DIR mujoco/mujoco.h HINTS "${MUJOCO_ROOT}/include")
++  find_library(MUJOCO_LIBRARY NAMES mujoco HINTS "${MUJOCO_ROOT}" "${MUJOCO_ROOT}/lib")
++  if(NOT MUJOCO_LIBRARY AND MUJOCO_ROOT)
++    file(GLOB MUJOCO_VERSIONED_LIBS "${MUJOCO_ROOT}/libmujoco.so.*" "${MUJOCO_ROOT}/lib/libmujoco.so.*")
++    if(MUJOCO_VERSIONED_LIBS)
++      list(SORT MUJOCO_VERSIONED_LIBS COMPARE NATURAL ORDER DESCENDING)
++      list(GET MUJOCO_VERSIONED_LIBS 0 MUJOCO_LIBRARY)
++    endif()
++  endif()
++  if(NOT MUJOCO_INCLUDE_DIR OR NOT MUJOCO_LIBRARY)
++    message(FATAL_ERROR "MuJoCo not found; set mujoco_DIR or MUJOCO_ROOT")
++  endif()
++  add_library(mujoco::mujoco SHARED IMPORTED)
++  set_target_properties(mujoco::mujoco PROPERTIES
++    IMPORTED_LOCATION "${MUJOCO_LIBRARY}"
++    INTERFACE_INCLUDE_DIRECTORIES "${MUJOCO_INCLUDE_DIR}")
++endif()
+ find_package(Eigen3 REQUIRED)
+ find_package(Torch REQUIRED)
+ 
+ add_executable(augmented_sim src/augmented_sim.cpp)
+-target_link_libraries(augmented_sim PRIVATE raisim::raisim Eigen3::Eigen ${TORCH_LIBRARIES} pthread)
++target_link_libraries(augmented_sim PRIVATE mujoco::mujoco Eigen3::Eigen ${TORCH_LIBRARIES} pthread)
+ target_compile_options(augmented_sim PRIVATE ${TORCH_CXX_FLAGS})

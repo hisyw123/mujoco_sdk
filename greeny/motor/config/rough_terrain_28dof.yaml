@@ -1,0 +1,32 @@
+# Full actuated-joint contract for the RoughTerrain biped/quadruped models.
+# CAM_J is included at index 0. L_gripper_J is
+# constrained 1:1 to R_gripper_J by the XML equality and has no actuator.
+motors:
+  - {name: CAM_J, joint_index: 0, joint_name: CAM_J, actuator_name: CAM_J, p_gain: 40.0, d_gain: 2.0}
+  - {name: arm1_J, joint_index: 1, joint_name: arm1_J, actuator_name: arm1_J, p_gain: 40.0, d_gain: 2.0}
+  - {name: arm2_J, joint_index: 2, joint_name: arm2_J, actuator_name: arm2_J, p_gain: 40.0, d_gain: 2.0}
+  - {name: arm3_J, joint_index: 3, joint_name: arm3_J, actuator_name: arm3_J, p_gain: 40.0, d_gain: 2.0}
+  - {name: arm4_J, joint_index: 4, joint_name: arm4_J, actuator_name: arm4_J, p_gain: 40.0, d_gain: 2.0}
+  - {name: arm5_J, joint_index: 5, joint_name: arm5_J, actuator_name: arm5_J, p_gain: 40.0, d_gain: 2.0}
+  - {name: arm6_J, joint_index: 6, joint_name: arm6_J, actuator_name: arm6_J, p_gain: 40.0, d_gain: 2.0}
+  - {name: R_gripper_J, joint_index: 7, joint_name: R_gripper_J, actuator_name: R_gripper_J, p_gain: 200.0, d_gain: 5.0}
+  - {name: LSY_J, joint_index: 8, joint_name: LSY_J, actuator_name: LSY_J, p_gain: 60.0, d_gain: 2.0}
+  - {name: LSP_J, joint_index: 9, joint_name: LSP_J, actuator_name: LSP_J, p_gain: 60.0, d_gain: 2.0}
+  - {name: LEP_J, joint_index: 10, joint_name: LEP_J, actuator_name: LEP_J, p_gain: 60.0, d_gain: 2.0}
+  - {name: LWP_J, joint_index: 11, joint_name: LWP_J, actuator_name: LWP_J, p_gain: 35.0, d_gain: 1.5}
+  - {name: RSY_J, joint_index: 12, joint_name: RSY_J, actuator_name: RSY_J, p_gain: 60.0, d_gain: 2.0}
+  - {name: RSP_J, joint_index: 13, joint_name: RSP_J, actuator_name: RSP_J, p_gain: 60.0, d_gain: 2.0}
+  - {name: REP_J, joint_index: 14, joint_name: REP_J, actuator_name: REP_J, p_gain: 60.0, d_gain: 2.0}
+  - {name: RWP_J, joint_index: 15, joint_name: RWP_J, actuator_name: RWP_J, p_gain: 35.0, d_gain: 1.5}
+  - {name: LHP_J, joint_index: 16, joint_name: LHP_J, actuator_name: LHP_J, p_gain: 100.0, d_gain: 1.0}
+  - {name: LHR_J, joint_index: 17, joint_name: LHR_J, actuator_name: LHR_J, p_gain: 100.0, d_gain: 1.0}
+  - {name: LHY_J, joint_index: 18, joint_name: LHY_J, actuator_name: LHY_J, p_gain: 100.0, d_gain: 1.0}
+  - {name: LKP_J, joint_index: 19, joint_name: LKP_J, actuator_name: LKP_J, p_gain: 100.0, d_gain: 1.0}
+  - {name: LAP_J, joint_index: 20, joint_name: LAP_J, actuator_name: LAP_J, p_gain: 100.0, d_gain: 1.0}
+  - {name: LAR_J, joint_index: 21, joint_name: LAR_J, actuator_name: LAR_J, p_gain: 100.0, d_gain: 1.0}
+  - {name: RHP_J, joint_index: 22, joint_name: RHP_J, actuator_name: RHP_J, p_gain: 100.0, d_gain: 1.0}
+  - {name: RHR_J, joint_index: 23, joint_name: RHR_J, actuator_name: RHR_J, p_gain: 100.0, d_gain: 1.0}
+  - {name: RHY_J, joint_index: 24, joint_name: RHY_J, actuator_name: RHY_J, p_gain: 100.0, d_gain: 1.0}
+  - {name: RKP_J, joint_index: 25, joint_name: RKP_J, actuator_name: RKP_J, p_gain: 100.0, d_gain: 1.0}
+  - {name: RAP_J, joint_index: 26, joint_name: RAP_J, actuator_name: RAP_J, p_gain: 100.0, d_gain: 1.0}
+  - {name: RAR_J, joint_index: 27, joint_name: RAR_J, actuator_name: RAR_J, p_gain: 100.0, d_gain: 1.0}
