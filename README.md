@@ -4,6 +4,41 @@ MuJoCo 3.13.1 전체 엔진 소스와 RoughTerrain3/GREENY 시뮬레이션 구�
 로봇 XML, URDF, 메시, ONNX 정책, 설정 및 RoughTerrain3 계약 테스트를 포함합니다.
 기존 MuJoCo 샘플 모델도 보존합니다. 빌드 결과, 캐시, 개인 설정, 학습 실행 로그는 제외합니다.
 
+## SDK 버전 관리
+
+이 저장소의 SDK 버전은 `vMAJOR.MINOR.PATCH` 형식의 annotated Git tag로 관리합니다.
+MuJoCo 엔진 버전(3.13.1) 및 upstream의 숫자 태그와는 별도입니다.
+`main`에는 개발 변경을 쌓고, 빌드·테스트를 통과한 커밋에 버전 태그를 붙입니다.
+공개한 태그는 이동하거나 덮어쓰지 않고 새 버전을 발행합니다.
+
+| 태그 | 내용 |
+| --- | --- |
+| `v0.1.0` | 최초 전체 소스 배포: RoughTerrain3/GREENY, 로봇 모델·정책, 포터블 빌드. 새 경로 빌드·계약 테스트·headless 실행 확인. GUI는 미검증. |
+
+버그 수정은 PATCH(`v0.1.1`), 기능 추가는 MINOR(`v0.2.0`), 호환성을 깨는 변경은
+MAJOR를 올립니다. `v1.0.0` 전에는 호환성을 깨는 변경도 MINOR를 올리고 변경 내용을 기록합니다.
+
+특정 버전을 내려받아 실행하려면:
+
+```bash
+git clone --branch v0.1.0 --depth 1 https://github.com/hisyw123/mujoco_sdk.git
+cd mujoco_sdk
+./scripts/build_sdk.sh
+```
+
+다음 버전 발행 예시(변경 내용과 위 버전 표를 먼저 커밋):
+
+```bash
+./scripts/build_sdk.sh
+ctest --test-dir build-sdk --output-on-failure
+# 변경에 맞는 headless/GUI 실행 검증 후 태그 생성
+git tag -a v0.1.1 -m "mujoco_sdk v0.1.1: 변경 내용"
+# sdk는 현재 작업 저장소의 GitHub 원격 이름입니다. 새 clone에서는 origin을 사용합니다.
+git push --atomic sdk HEAD:main refs/tags/v0.1.1
+```
+
+태그 조회: `git tag --list 'v*' --sort=-version:refname`
+
 ## 새 PC에서 빌드 (Ubuntu 22.04/24.04, Linux x86_64)
 
 최초 빌드는 인터넷이 필요합니다. MuJoCo의 고정 버전 소스 의존성은 CMake가,
